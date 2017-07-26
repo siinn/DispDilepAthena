@@ -1,7 +1,0 @@
-libDispDilepAthena.so:CosmicTools
-libDispDilepAthena.so:DVUtils
-libDispDilepAthena.so:DispDilepAthenaAlg
-libDispDilepAthena.so:DisplacedDimuonAnalysisAlg
-libDispDilepAthena.so:FlipBkgEst
-libDispDilepAthena.so:LeptonSelectionTools
-libDispDilepAthena.so:SMBkgEst
