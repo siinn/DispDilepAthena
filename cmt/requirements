@@ -1,0 +1,91 @@
+## automatically generated CMT requirements file
+package  DispDilepAthena
+author  che.32
+
+#-------------------------------------------------------
+# public
+#-------------------------------------------------------
+
+## for athena policies: this has to be the first use statement
+use AtlasPolicy 	            AtlasPolicy-*
+
+## for gaudi tools, services and objects
+use GaudiInterface 	            GaudiInterface-*                External
+use AthenaBaseComps             AthenaBaseComps-*               Control
+use AsgTools                    AsgTools-*                      Control/AthToolSupport
+
+# trigger matching tool
+use TriggerMatchingTool         TriggerMatchingTool-*           Trigger/TrigAnalysis
+use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnalysis
+
+# DV
+use DDLBase                     DDLBase-*                       
+
+# xAOD
+use xAODTracking                xAODTracking-*                  Event/xAOD
+use xAODTruth                   xAODTruth-*                     Event/xAOD
+use xAODMuon                    xAODMuon-*                      Event/xAOD
+use xAODEgamma                  xAODEgamma-*                    Event/xAOD
+
+use ElectronPhotonSelectorTools ElectronPhotonSelectorTools-*   PhysicsAnalysis/ElectronPhotonID
+use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
+use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
+
+
+#-------------------------------------------------------
+# private
+#-------------------------------------------------------
+
+private
+
+use AthenaKernel                AthenaKernel-*                  Control
+use AthAnalysisBaseComps        AthAnalysisBaseComps-*          Control
+#use EventInfo                   EventInfo-*                     Event
+use GaudiInterface              GaudiInterface-*                External
+use GoodRunsLists               GoodRunsLists-*                 DataQuality
+
+# xAOD
+use xAODBase                    xAODBase-*                      Event/xAOD
+use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
+use xAODEgamma                  xAODEgamma-*                    Event/xAOD
+use xAODTracking                xAODTracking-*                  Event/xAOD
+use xAODEventInfo               xAODEventInfo-*                 Event/xAOD
+use xAODCore                    xAODCore-*                      Event/xAOD
+
+use PathResolver                PathResolver-*                  Tools
+
+# muon
+use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
+#use MuonPerformanceHistUtils    MuonPerformanceHistUtils-*      PhysicsAnalysis/MuonID/MuonPerformanceAnalysis
+#use MuonEfficiencyCorrections   MuonEfficiencyCorrections-*     PhysicsAnalysis/MuonID/MuonIDAnalysis 
+
+use AtlasROOT                   AtlasROOT-*                     External
+
+# DV
+use DDLCombBkg                  DDLCombBkg-*                       
+
+# for StoreGate dump
+#use  StoreGate                  StoreGate-*                     Control
+
+# luminosity calculation
+#use xAODRootAccess              xAODRootAccess-*                Control
+#use xAODLuminosity              xAODLuminosity-*                Event/xAOD
+
+end_private
+
+## put here your package dependencies...
+
+##
+
+branches src src/components doc python share
+
+## default is to make component library. See: https://twiki.cern.ch/twiki/bin/view/Main/LearningAthena#Libraries_in_CMT for alternatives
+
+
+apply_pattern declare_joboptions files="*.py"
+apply_pattern declare_python_modules files="*.py"
+
+
+
+library DispDilepAthena *.cxx components/*.cxx
+apply_pattern component_library
