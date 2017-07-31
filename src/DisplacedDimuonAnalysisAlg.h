@@ -105,6 +105,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_DeltaR_low; //!
             TH1F* m_dv_mumu_Rcos; //!
             TH1F* m_dv_mumu_Rcos_low; //!
+            TH2F* m_dv_mumu_DeltaR_Rcos; //!
 
             // MC matching
             TH1F* m_dv_mumu_M_matched; //!

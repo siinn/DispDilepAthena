@@ -861,6 +861,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         float vtx_z = fit->position().z();
 
         float vtx_perp = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y);
+        float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+        // mass cut
+        float mass_min = 3.;
 
         ATH_MSG_DEBUG("PerfomrFit: Found vertex with perp = " << vtx_perp);
         ATH_MSG_DEBUG("Found vertex with channel " << channel);
@@ -889,7 +893,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_mumu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_mumu_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_mumu_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -935,7 +941,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_emu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_emu_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_emu_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -980,7 +988,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_ee_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_ee_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_ee_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1026,7 +1036,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_idid_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_idid_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_idid_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1074,7 +1086,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_mut_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_mut_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_mut_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1122,7 +1136,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_et_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_et_cf_noflip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_et_cf_noflip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1167,6 +1183,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
 
         float vtx_perp = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y);
         float vtx_l = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y + vtx_z*vtx_z);
+        float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+        // mass cut
+        float mass_min = 3.;
 
         ATH_MSG_DEBUG("PerfomrFit: Found vertex with perp = " << vtx_perp);
 
@@ -1196,7 +1216,8 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_mumu_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            if(dv_mass < mass_min) return;
             m_mumu_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1242,7 +1263,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_emu_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            if(dv_mass < mass_min) return;
             m_emu_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1287,7 +1308,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_ee_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_ee_cf_flip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_ee_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1333,7 +1356,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_idid_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_idid_cf_flip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_idid_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1352,7 +1377,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_idid_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
 
             // mass plot
-            float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+            //float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
             m_idid_flip_M->Fill(dv_mass);
 
             // deltaR plot
@@ -1400,7 +1425,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_mut_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_mut_cf_flip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_mut_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)
@@ -1448,7 +1475,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             m_et_cf_flip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //if(!m_dvc->PassLowMassVeto(*fit)) return;
+            //m_et_cf_flip->Fill("LowMassVeto", 1);
+            if(dv_mass < mass_min) return;
             m_et_cf_flip->Fill("LowMassVeto", 1);
 
             // cosmic veto (R_CR)

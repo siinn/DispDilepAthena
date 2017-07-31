@@ -7,9 +7,6 @@
 #include "../FlipBkgEst.h"
 DECLARE_ALGORITHM_FACTORY( FlipBkgEst )
 
-#include "../SMBkgEst.h"
-DECLARE_ALGORITHM_FACTORY( SMBkgEst )
-
 #include "../DisplacedDimuonAnalysisAlg.h"
 DECLARE_ALGORITHM_FACTORY( DisplacedDimuonAnalysisAlg )
 
@@ -24,7 +21,6 @@ DECLARE_FACTORY_ENTRIES( DispDilepAthena )
 {
   //DECLARE_ALGORITHM( DispDilepAthenaAlg );
   DECLARE_ALGORITHM( FlipBkgEst );
-  DECLARE_ALGORITHM( SMBkgEst );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )
   DECLARE_TOOL( DVUtils )
   DECLARE_TOOL( LeptonSelectionTools )
