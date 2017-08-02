@@ -142,11 +142,19 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         TH1F* m_mut_noflip_z; //!
         TH1F* m_mut_flip_R; //!
         TH1F* m_mut_flip_z; //!
+        TH1F* m_mut_flip_M; //!
+        TH1F* m_mut_flip_l; //!
+        TH1F* m_mut_flip_chi2_ndof; //!
+        TH1F* m_mut_flip_deltaR; //!
 
         TH1F* m_et_noflip_R; //!
         TH1F* m_et_noflip_z; //!
         TH1F* m_et_flip_R; //!
         TH1F* m_et_flip_z; //!
+        TH1F* m_et_flip_M; //!
+        TH1F* m_et_flip_l; //!
+        TH1F* m_et_flip_chi2_ndof; //!
+        TH1F* m_et_flip_deltaR; //!
 
 
         // counting pairs

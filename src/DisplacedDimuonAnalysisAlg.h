@@ -208,7 +208,20 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         // lepton + track plots
         //----------------------------------
             TH1D* m_dv_mut_cf; //!
+            TH1F* m_dv_mut_M; //!
+            TH1F* m_dv_mut_z; //!
+            TH1F* m_dv_mut_R; //!
+            TH1F* m_dv_mut_l; //!
+            TH1F* m_dv_mut_chi2_ndof; //!
+            TH1F* m_dv_mut_deltaR; //!
+
             TH1D* m_dv_et_cf; //!
+            TH1F* m_dv_et_M; //!
+            TH1F* m_dv_et_z; //!
+            TH1F* m_dv_et_R; //!
+            TH1F* m_dv_et_l; //!
+            TH1F* m_dv_et_chi2_ndof; //!
+            TH1F* m_dv_et_deltaR; //!
 
         //----------------------------------
         // trk-trk plots

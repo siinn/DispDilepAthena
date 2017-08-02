@@ -130,13 +130,21 @@ StatusCode FlipBkgEst::initialize() {
 
     m_mut_noflip_R = new TH1F( "m_mut_noflip_R", "vertex R (no flip)", 100,0,300);
     m_mut_noflip_z = new TH1F( "m_mut_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 100,0,300);
-    m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 100,-1000,1000);
+    m_mut_flip_M = new TH1F("m_mut_flip_M","DV mass in GeV", 1000, 0, 1000. );
+    m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 60,0,300);
+    m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 20,-1000,1000);
+    m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 20, 0, 1000. );
+    m_mut_flip_deltaR = new TH1F( "m_mut_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
+    m_mut_flip_chi2_ndof = new TH1F("m_mut_flip_chi2_ndof","chi2 / ndof", 20, 0, 5. );
 
     m_et_noflip_R = new TH1F( "m_et_noflip_R", "vertex R (no flip)", 100,0,300);
     m_et_noflip_z = new TH1F( "m_et_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 100,0,300);
-    m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 100,-1000,1000);
+    m_et_flip_M = new TH1F("m_et_flip_M","DV mass in GeV", 1000, 0, 1000. );
+    m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 60,0,300);
+    m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 20,-1000,1000);
+    m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 20, 0, 1000. );
+    m_et_flip_deltaR = new TH1F( "m_et_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
+    m_et_flip_chi2_ndof = new TH1F("m_et_flip_chi2_ndof","chi2 / ndof", 20, 0, 5. );
 
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_mu", m_n_mu) );
@@ -199,11 +207,19 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_noflip_z", m_mut_noflip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_R", m_mut_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_z", m_mut_flip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_M", m_mut_flip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_l", m_mut_flip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_deltaR", m_mut_flip_deltaR) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_chi2_ndof", m_mut_flip_chi2_ndof) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_noflip_R", m_et_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_noflip_z", m_et_noflip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_R", m_et_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_z", m_et_flip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_M", m_et_flip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_l", m_et_flip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_deltaR", m_et_flip_deltaR) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_chi2_ndof", m_et_flip_chi2_ndof) );
 
     // flag to check MC
     bool isMC;
@@ -310,54 +326,6 @@ StatusCode FlipBkgEst::execute() {
     m_n_elc->Fill(elc->size());
     m_n_id->Fill(idc->size());
 
-    //-----------------------------------
-    // Secondary vertex truth matching
-    //-----------------------------------
-    //if (isMC) {
-    //    // perform vertex truth matching
-    //    ATH_MSG_INFO("============= Truth matching vertices by tracks =================");
-    //    CHECK( m_matchTool->matchVertices(*dvc));
-
-    //    // accessor for the vertex matching type
-    //    xAOD::Vertex::Decorator<InDetVertexTruthMatchUtils::VertexMatchType> getMatchType("VertexMatchType");
-    //    xAOD::Vertex::Decorator<std::vector<InDetVertexTruthMatchUtils::VertexTruthMatchInfo>> getMatchInfo("TruthEventMatchingInfos");
-
-    //    for(auto recoVertex: *dvc_copy.first) {
-
-    //        auto matchType = getMatchType(*recoVertex);
-    //        auto infos = getMatchInfo(*recoVertex);
-
-    //        ATH_MSG_INFO("Vertex type: " << recoVertex->vertexType());
-    //        ATH_MSG_INFO("Vertex match type: " << matchType);
-
-    //        for (const auto infopair: infos) {
-
-    //            auto link = infopair.first;
-    //            float weight = infopair.second;
-
-    //            if (!link.isValid()) {
-    //                ATH_MSG_INFO("Fakes, weight: " << weight);
-    //            }
-    //        }
-
-    //        if (matchType == InDetVertexTruthMatchUtils::VertexMatchType::FAKE || matchType == InDetVertexTruthMatchUtils::VertexMatchType::DUMMY) {
-    //            ATH_MSG_INFO("This vertex is FAKE" );
-    //        }
-
-    //        ATH_MSG_INFO("============= matching vertices by position =================");
-    //        const xAOD::TruthVertex *tvMatched = nullptr;
-    //        tvMatched = getClosestTruthVertex(recoVertex);
-
-    //        if(tvMatched){
-    //            ATH_MSG_INFO("Found truth vertex closest to dv " << recoVertex );
-    //            ATH_MSG_INFO("-- ntracks from truth vertex = " << tvMatched->nOutgoingParticles());
-    //            ATH_MSG_INFO("-- ntracks from reco vertex = " << recoVertex->nTrackParticles());
-    //        }
-    //        else {
-    //            ATH_MSG_INFO("Not found");
-    //        }
-    //    }
-    //}
 
     //-----------------------------------
     // track selection and deep copy
@@ -1438,9 +1406,28 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
             m_mut_cf_flip->Fill("#DeltaR > 0.5", 1);
 
+            //==========================================
             // vertex distribution fill
+            //==========================================
             m_mut_flip_R->Fill(vtx_perp);
             m_mut_flip_z->Fill(vtx_z);
+            m_mut_flip_l->Fill(vtx_l);
+            m_mut_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+
+            // mass plot
+            m_mut_flip_M->Fill(dv_mass);
+
+            // deltaR plot
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+
+            // define TLorentzVector of decay particles
+            tlv_tp0 = tr1.p4();
+            tlv_tp1 = tr2.p4();
+
+            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+            m_mut_flip_deltaR->Fill(deltaR);
+            //==========================================
 
             // truth match
             if (isMC){
@@ -1488,9 +1475,29 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
             m_et_cf_flip->Fill("#DeltaR > 0.5", 1);
 
+            //==========================================
             // vertex distribution fill
+            //==========================================
             m_et_flip_R->Fill(vtx_perp);
             m_et_flip_z->Fill(vtx_z);
+            m_et_flip_l->Fill(vtx_l);
+            m_et_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+
+            // mass plot
+            //float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+            m_et_flip_M->Fill(dv_mass);
+
+            // deltaR plot
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+
+            // define TLorentzVector of decay particles
+            tlv_tp0 = tr1.p4();
+            tlv_tp1 = tr2.p4();
+
+            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+            m_et_flip_deltaR->Fill(deltaR);
+            //==========================================
 
             // truth match
             if (isMC){

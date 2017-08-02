@@ -318,7 +318,20 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_idid_chi2_ndof = new TH1F("dv_idid_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
 
     m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 12,0,12);
+    m_dv_mut_M = new TH1F("dv_mut_M","DV mass in GeV", 2000, 0, 2000. );
+    m_dv_mut_R = new TH1F("dv_mut_R","R [mm]", 60, 0, 300. );
+    m_dv_mut_z = new TH1F("dv_mut_z","z [mm]", 20, -1000., 1000.);
+    m_dv_mut_deltaR = new TH1F("dv_mut_deltaR","deltaR", 20, 0., 2.);
+    m_dv_mut_l = new TH1F("dv_mut_l","l [mm]", 20, 0., 1000.);
+    m_dv_mut_chi2_ndof = new TH1F("dv_mut_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
+
     m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 12,0,12);
+    m_dv_et_M = new TH1F("dv_et_M","DV mass in GeV", 2000, 0, 2000. );
+    m_dv_et_R = new TH1F("dv_et_R","R [mm]", 60, 0, 300. );
+    m_dv_et_z = new TH1F("dv_et_z","z [mm]", 20, -1000., 1000.);
+    m_dv_et_deltaR = new TH1F("dv_et_deltaR","deltaR", 20, 0., 2.);
+    m_dv_et_l = new TH1F("dv_et_l","l [mm]", 20, 0., 1000.);
+    m_dv_et_chi2_ndof = new TH1F("dv_et_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
 
     CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_cf", m_dv_idid_cf) );
     CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_M", m_dv_idid_M) );
@@ -329,7 +342,20 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
 
     CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_cf", m_dv_mut_cf) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_M", m_dv_mut_M) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_R", m_dv_mut_R) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_z", m_dv_mut_z) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_deltaR", m_dv_mut_deltaR) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_l", m_dv_mut_l) );
+    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_chi2_ndof", m_dv_mut_chi2_ndof) );
+
     CHECK( histSvc->regHist("/DV/dv_et/dv_et_cf", m_dv_et_cf) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_M", m_dv_et_M) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_R", m_dv_et_R) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_z", m_dv_et_z) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_deltaR", m_dv_et_deltaR) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_l", m_dv_et_l) );
+    CHECK( histSvc->regHist("/DV/dv_et/dv_et_chi2_ndof", m_dv_et_chi2_ndof) );
 
     return StatusCode::SUCCESS;
 }
@@ -443,9 +469,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // counting all dv
         n_dv_all++;
 
-        // select only vertex with tracks
-        if(dv->trackParticleLinks().size() != 2) continue;
-
         // perform lepton matching
         m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
 
@@ -470,6 +493,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // muon selection tool
         m_leptool->MuonSelection(*dv);
+
+        // select only vertex with tracks
+        if(dv->trackParticleLinks().size() != 2) continue;
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
@@ -786,6 +812,22 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
             m_dv_mut_cf->Fill("#DeltaR > 0.5", 1);
 
+            // plot dv
+            plot_dv(*dv, *pv, channel);
+            m_dv_mut_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+
+            // deltaR plot
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+
+            // define TLorentzVector of decay particles
+            tlv_tp0 = tp1.p4();
+            tlv_tp1 = tp2.p4();
+
+            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+            m_dv_mut_deltaR->Fill(deltaR);
+
+
 
             // truth match
             if (isMC){
@@ -843,6 +885,21 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // cosmic veto (deltaR)
             if(!PassCosmicVeto_DeltaR(tp1, tp2)) continue;
             m_dv_et_cf->Fill("#DeltaR > 0.5", 1);
+
+            // plot dv
+            plot_dv(*dv, *pv, channel);
+            m_dv_et_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
+
+            // deltaR plot
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+
+            // define TLorentzVector of decay particles
+            tlv_tp0 = tp1.p4();
+            tlv_tp1 = tp2.p4();
+
+            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+            m_dv_et_deltaR->Fill(deltaR);
 
 
             // truth match
@@ -1106,6 +1163,20 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_idid_R->Fill(dv_R);                                
         m_dv_idid_z->Fill(dv_z);                                
         m_dv_idid_l->Fill(dv_l);                                
+    }
+
+    if (channel == "mut"){
+        m_dv_mut_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_mut_R->Fill(dv_R);                                
+        m_dv_mut_z->Fill(dv_z);                                
+        m_dv_mut_l->Fill(dv_l);                                
+    }
+
+    if (channel == "et"){
+        m_dv_et_M->Fill(dv_mass);                             // dimuon mass
+        m_dv_et_R->Fill(dv_R);                                
+        m_dv_et_z->Fill(dv_z);                                
+        m_dv_et_l->Fill(dv_l);                                
     }
 
     return;
