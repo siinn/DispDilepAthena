@@ -74,50 +74,56 @@ StatusCode FlipBkgEst::initialize() {
 
     m_n_mu = new TH1D( "m_n_mu", "Number of muons in event", 100,0,100);
     m_n_elc = new TH1D( "m_n_elc", "Number of electrons in event", 100,0,100);
-    m_n_id = new TH1D( "m_n_id", "Number id tracks in event", 100,0,100);
+    m_n_id = new TH1D( "m_n_id", "Number id tracks in event", 300,0,300);
 
     m_n_mu_sel = new TH1D( "m_n_mu_sel", "Number of selected muons in event", 100,0,100);
     m_n_elc_sel = new TH1D( "m_n_elc_sel", "Number of selected electrons in event", 100,0,100);
-    m_n_id_sel = new TH1D( "m_n_id_sel", "Number of selected id tracks in event", 100,0,100);
+    m_n_id_sel = new TH1D( "m_n_id_sel", "Number of selected id tracks in event", 300,0,300);
 
-    m_mumu_cf_input = new TH1D( "m_mumu_cf_input", "Input mumu cutflow", 11,0,11);
-    m_mumu_cf_noflip = new TH1D( "m_mumu_cf_noflip", "mumu cutflow (no flip)", 11,0,11);
-    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 11,0,11);
+    m_mumu_cf_input = new TH1D( "m_mumu_cf_input", "Input mumu cutflow", 12,0,12);
+    m_mumu_cf_noflip = new TH1D( "m_mumu_cf_noflip", "mumu cutflow (no flip)", 12,0,12);
+    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 12,0,12);
 
-    m_ee_cf_input = new TH1D( "m_ee_cf_input", "Input ee cutflow", 11,0,11);
-    m_ee_cf_noflip = new TH1D( "m_ee_cf_noflip", "ee cutflow (no flip)", 11,0,11);
-    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 11,0,11);
+    m_ee_cf_input = new TH1D( "m_ee_cf_input", "Input ee cutflow", 12,0,12);
+    m_ee_cf_noflip = new TH1D( "m_ee_cf_noflip", "ee cutflow (no flip)", 12,0,12);
+    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 12,0,12);
 
-    m_emu_cf_input = new TH1D( "m_emu_cf_input", "Input emu cutflow", 11,0,11);
-    m_emu_cf_noflip = new TH1D( "m_emu_cf_noflip", "emu cutflow (no flip)", 11,0,11);
-    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 11,0,11);
+    m_emu_cf_input = new TH1D( "m_emu_cf_input", "Input emu cutflow", 12,0,12);
+    m_emu_cf_noflip = new TH1D( "m_emu_cf_noflip", "emu cutflow (no flip)", 12,0,12);
+    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 12,0,12);
 
-    m_idid_cf_input = new TH1D( "m_idid_cf_input", "Input idid cutflow", 11,0,11);
-    m_idid_cf_noflip = new TH1D( "m_idid_cf_noflip", "idid cutflow (no flip)", 11,0,11);
-    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 11,0,11);
+    m_idid_cf_input = new TH1D( "m_idid_cf_input", "Input idid cutflow", 12,0,12);
+    m_idid_cf_noflip = new TH1D( "m_idid_cf_noflip", "idid cutflow (no flip)", 12,0,12);
+    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 12,0,12);
 
-    m_mut_cf_input = new TH1D( "m_mut_cf_input", "Input mut cutflow", 11,0,11);
-    m_mut_cf_noflip = new TH1D( "m_mut_cf_noflip", "mut cutflow (no flip)", 11,0,11);
-    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 11,0,11);
+    m_mut_cf_input = new TH1D( "m_mut_cf_input", "Input mut cutflow", 12,0,12);
+    m_mut_cf_noflip = new TH1D( "m_mut_cf_noflip", "mut cutflow (no flip)", 12,0,12);
+    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 12,0,12);
 
-    m_et_cf_input = new TH1D( "m_et_cf_input", "Input et cutflow", 11,0,11);
-    m_et_cf_noflip = new TH1D( "m_et_cf_noflip", "et cutflow (no flip)", 11,0,11);
-    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 11,0,11);
+    m_et_cf_input = new TH1D( "m_et_cf_input", "Input et cutflow", 12,0,12);
+    m_et_cf_noflip = new TH1D( "m_et_cf_noflip", "et cutflow (no flip)", 12,0,12);
+    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 12,0,12);
 
     m_mumu_noflip_R = new TH1F( "m_mumu_noflip_R", "vertex R (no flip)", 100,0,300);
     m_mumu_noflip_z = new TH1F( "m_mumu_noflip_z", "vertex z (no flip)", 100,-1000,1000);
+    m_mumu_noflip_M = new TH1F( "m_mumu_noflip_M", "vertex M (no flip)", 100,0,1000);
     m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 100,0,300);
     m_mumu_flip_z = new TH1F( "m_mumu_flip_z", "vertex z (flip)", 100,-1000,1000);
+    m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 100,0,1000);
 
     m_ee_noflip_R = new TH1F( "m_ee_noflip_R", "vertex R (no flip)", 100,0,300);
     m_ee_noflip_z = new TH1F( "m_ee_noflip_z", "vertex z (no flip)", 100,-1000,1000);
+    m_ee_noflip_M = new TH1F( "m_ee_noflip_M", "vertex M (no flip)", 100,0,1000);
     m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 100,0,300);
     m_ee_flip_z = new TH1F( "m_ee_flip_z", "vertex z (flip)", 100,-1000,1000);
+    m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 100,0,1000);
 
     m_emu_noflip_R = new TH1F( "m_emu_noflip_R", "vertex R (no flip)", 100,0,300);
     m_emu_noflip_z = new TH1F( "m_emu_noflip_z", "vertex z (no flip)", 100,-1000,1000);
+    m_emu_noflip_M = new TH1F( "m_emu_noflip_M", "vertex M (no flip)", 100,0,1000);
     m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 100,0,300);
     m_emu_flip_z = new TH1F( "m_emu_flip_z", "vertex z (flip)", 100,-1000,1000);
+    m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 100,0,1000);
 
     m_idid_noflip_R = new TH1F( "m_idid_noflip_R", "vertex R (no flip)", 100,0,300);
     m_idid_noflip_z = new TH1F( "m_idid_noflip_z", "vertex z (no flip)", 100,-1000,1000);
@@ -181,18 +187,24 @@ StatusCode FlipBkgEst::initialize() {
     // vertex distribution
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_R", m_mumu_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_z", m_mumu_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_M", m_mumu_noflip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_R", m_mumu_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_z", m_mumu_flip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_M", m_mumu_flip_M) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_R", m_ee_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_z", m_ee_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_M", m_ee_noflip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_R", m_ee_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_z", m_ee_flip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_M", m_ee_flip_M) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_R", m_emu_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_z", m_emu_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_M", m_emu_noflip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_R", m_emu_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_z", m_emu_flip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_M", m_emu_flip_M) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_R", m_idid_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_z", m_idid_noflip_z) );
@@ -261,9 +273,6 @@ StatusCode FlipBkgEst::execute() {
     if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     if(!trig_passed) return StatusCode::SUCCESS;
-
-    // trigger check
-    //if(!m_evtc->PassTrigger()) return StatusCode::SUCCESS;
 
     // retrieve lepton and track container
     const xAOD::MuonContainer* muc = nullptr;
@@ -447,20 +456,20 @@ StatusCode FlipBkgEst::execute() {
         {
             for(auto el2_itr = el1_itr+1; el2_itr != el_sel->end(); el2_itr++)
             {
-                // counting pairs
-                //m_ee_cf_flip->Fill("pair",1);
-                //m_ee_cf_noflip->Fill("pair",1);
-                
-                // create accessor for trig match flag
-                static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
-                bool match2 = acc_lep_trig_match.isAvailable(**el2_itr);
+                //// create accessor for trig match flag
+                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
+                //bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
+                //bool match2 = acc_lep_trig_match.isAvailable(**el2_itr);
 
-                // skip this pair if both lepton don't match to any trigger
-                if (!(match1 or match2)) {
-                    ATH_MSG_DEBUG("This pair failed trigger matching");
-                    continue;
-                }
+                //// skip this pair if both lepton don't match to any trigger
+                //if (!(match1 or match2)) {
+                //    ATH_MSG_DEBUG("This pair failed trigger matching");
+                //    continue;
+                //}
+           
+                // count number of pairs
+                m_ee_cf_noflip->Fill("ee pair",1);
+                m_ee_cf_flip->Fill("ee pair",1);
 
                 auto dp = (**el1_itr).definingParameters();
 
@@ -494,21 +503,20 @@ StatusCode FlipBkgEst::execute() {
         {
             for(auto mu_itr = mu_sel->begin(); mu_itr != mu_sel->end(); mu_itr++)
             {
-                // counting pairs
-                //m_emu_cf_flip->Fill("pair",1);
-                //m_emu_cf_noflip->Fill("pair",1);
-
-                // create accessor for trig match flag
-                static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
-                bool match2 = acc_lep_trig_match.isAvailable(**mu_itr);
+                //// create accessor for trig match flag
+                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
+                //bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
+                //bool match2 = acc_lep_trig_match.isAvailable(**mu_itr);
 
                 // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) continue;
-                if (!(match1 or match2)) {
-                    ATH_MSG_DEBUG("This pair failed trigger matching");
-                    continue;
-                }
+                //if (!(match1 or match2)) {
+                //    ATH_MSG_DEBUG("This pair failed trigger matching");
+                //    continue;
+                //}
+
+                // count number of pairs
+                m_emu_cf_noflip->Fill("e#mu pair",1);
+                m_emu_cf_flip->Fill("e#mu pair",1);
 
                 auto dp = (**el1_itr).definingParameters();
 
@@ -543,21 +551,20 @@ StatusCode FlipBkgEst::execute() {
         {
             for(auto mu2_itr = mu1_itr+1; mu2_itr != mu_sel->end(); mu2_itr++)
             {
-                // counting pairs
-                //m_mumu_cf_flip->Fill("pair",1);
-                //m_mumu_cf_noflip->Fill("pair",1);
-
-                // create accessor for trig match flag
-                static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                bool match1 = acc_lep_trig_match.isAvailable(**mu1_itr);
-                bool match2 = acc_lep_trig_match.isAvailable(**mu2_itr);
+                //// create accessor for trig match flag
+                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
+                //bool match1 = acc_lep_trig_match.isAvailable(**mu1_itr);
+                //bool match2 = acc_lep_trig_match.isAvailable(**mu2_itr);
 
                 // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) continue;
-                if (!(match1 or match2)) {
-                    ATH_MSG_DEBUG("This pair failed trigger matching");
-                    continue;
-                }
+                //if (!(match1 or match2)) {
+                //    ATH_MSG_DEBUG("This pair failed trigger matching");
+                //    continue;
+                //}
+
+                // count number of pairs
+                m_mumu_cf_noflip->Fill("#mu#mu pair",1);
+                m_mumu_cf_flip->Fill("#mu#mu pair",1);
                 
                 auto dp = (**mu1_itr).definingParameters();
 
@@ -592,10 +599,12 @@ StatusCode FlipBkgEst::execute() {
         {
             for(auto id2_itr = id1_itr+1; id2_itr != id_sel->end(); id2_itr++)
             {
-                // counting pairs
-                //m_idid_cf_flip->Fill("pair",1);
-                //m_idid_cf_noflip->Fill("pair",1);
 
+                // count number of pairs
+                m_idid_cf_noflip->Fill("n-n pair",1);
+                m_idid_cf_flip->Fill("n-n pair",1);
+
+                // counting pairs
                 n_tt_pair++;
 
                 // no trigger matching for id tracks pair 
@@ -646,6 +655,10 @@ StatusCode FlipBkgEst::execute() {
                 //m_mut_cf_flip->Fill("pair",1);
                 //m_mut_cf_noflip->Fill("pair",1);
 
+                // count number of pairs
+                m_mut_cf_noflip->Fill("#mu-n pair",1);
+                m_mut_cf_flip->Fill("#mu-n pair",1);
+
                 auto dp = (**id1_itr).definingParameters();
 
                 // vertex fit of two original tracks
@@ -692,6 +705,10 @@ StatusCode FlipBkgEst::execute() {
                 // counting pairs
                 //m_et_cf_flip->Fill("pair",1);
                 //m_et_cf_noflip->Fill("pair",1);
+
+                // count number of pairs
+                m_et_cf_noflip->Fill("e-n pair",1);
+                m_et_cf_flip->Fill("e-n pair",1);
 
                 auto dp = (**id1_itr).definingParameters();
 
@@ -841,6 +858,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         
             m_mumu_cf_noflip->Fill("#mu#mu",1);
 
+            // place holder to match with main analysis
+            m_mumu_cf_noflip->Fill("place holder",1);
+
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
             m_mumu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
@@ -861,8 +881,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_mumu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_mumu_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_mumu_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -877,6 +895,7 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             // vertex distribution fill
             m_mumu_noflip_R->Fill(vtx_perp);
             m_mumu_noflip_z->Fill(vtx_z);
+            m_mumu_noflip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -887,6 +906,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         }
         if(channel == "emu") {
             m_emu_cf_noflip->Fill("e#mu",1);
+
+            // place holder to match with main analysis
+            m_emu_cf_noflip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -909,8 +931,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_emu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_emu_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_emu_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -925,6 +945,7 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             // vertex distribution fill
             m_emu_noflip_R->Fill(vtx_perp);
             m_emu_noflip_z->Fill(vtx_z);
+            m_emu_noflip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -934,6 +955,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         }
         if(channel == "ee") {
             m_ee_cf_noflip->Fill("ee",1);
+
+            // place holder to match with main analysis
+            m_ee_cf_noflip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -956,8 +980,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_ee_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_ee_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_ee_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -972,6 +994,7 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             // vertex distribution fill
             m_ee_noflip_R->Fill(vtx_perp);
             m_ee_noflip_z->Fill(vtx_z);
+            m_ee_noflip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -982,6 +1005,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         if(channel == "idid") {
         
             m_idid_cf_noflip->Fill("Trk-Trk",1);
+
+            // place holder to match with main analysis
+            m_idid_cf_noflip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -1004,8 +1030,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_idid_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_idid_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_idid_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -1033,6 +1057,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         
             m_mut_cf_noflip->Fill("#mu-Trk",1);
 
+            // place holder to match with main analysis
+            m_mut_cf_noflip->Fill("place holder",1);
+
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
             m_mut_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
@@ -1054,8 +1081,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_mut_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_mut_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_mut_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -1083,6 +1108,9 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         
             m_et_cf_noflip->Fill("e-Trk",1);
 
+            // place holder to match with main analysis
+            m_et_cf_noflip->Fill("place holder",1);
+
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
             m_et_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
@@ -1104,8 +1132,6 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             m_et_cf_noflip->Fill("MaterialVeto (Only e)", 1);
 
             // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_et_cf_noflip->Fill("LowMassVeto", 1);
             if(dv_mass < mass_min) return;
             m_et_cf_noflip->Fill("LowMassVeto", 1);
 
@@ -1164,6 +1190,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         
             m_mumu_cf_flip->Fill("#mu#mu",1);
 
+            // place holder to match with main analysis
+            m_mumu_cf_flip->Fill("place holder",1);
+
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
             m_mumu_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
@@ -1199,6 +1228,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             // vertex distribution fill
             m_mumu_flip_R->Fill(vtx_perp);
             m_mumu_flip_z->Fill(vtx_z);
+            m_mumu_flip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -1209,6 +1239,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         }
         if(channel == "emu") {
             m_emu_cf_flip->Fill("e#mu",1);
+
+            // place holder to match with main analysis
+            m_emu_cf_flip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -1245,6 +1278,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             // vertex distribution fill
             m_emu_flip_R->Fill(vtx_perp);
             m_emu_flip_z->Fill(vtx_z);
+            m_emu_flip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -1254,6 +1288,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         }
         if(channel == "ee") {
             m_ee_cf_flip->Fill("ee",1);
+
+            // place holder to match with main analysis
+            m_ee_cf_flip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -1292,6 +1329,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             // vertex distribution fill
             m_ee_flip_R->Fill(vtx_perp);
             m_ee_flip_z->Fill(vtx_z);
+            m_ee_flip_M->Fill(dv_mass);
 
             // truth match
             if (isMC){
@@ -1302,6 +1340,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         if(channel == "idid") {
         
             m_idid_cf_flip->Fill("Trk-Trk",1);
+
+            // place holder to match with main analysis
+            m_idid_cf_flip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
@@ -1372,6 +1413,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         
             m_mut_cf_flip->Fill("#mu-Trk",1);
 
+            // place holder to match with main analysis
+            m_mut_cf_flip->Fill("place holder",1);
+
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;
             m_mut_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
@@ -1440,6 +1484,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
         if(channel == "et") {
         
             m_et_cf_flip->Fill("e-Trk",1);
+
+            // place holder to match with main analysis
+            m_et_cf_flip->Fill("place holder",1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*fit)) return;

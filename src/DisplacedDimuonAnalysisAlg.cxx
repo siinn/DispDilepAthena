@@ -93,17 +93,13 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_mumu_mu_phi = new TH1F("dv_mumu_mu_phi","Signal muon phi",50,-M_PI,M_PI);
     m_dv_mumu_mu_d0 = new TH1F("dv_mumu_mu_d0","Signal muon d0",50,-300,300);
     m_dv_mumu_mu_z0 = new TH1F("dv_mumu_mu_z0","Signal muon z0",50,-1000,1000);
-    //m_dv_mumu_mu_pt_min = new TH1F("dv_mumu_mu_pt_min","Signal muon pt_min",50,0.,1000.);
-    //m_dv_mumu_mu_pt_min_low = new TH1F("dv_mumu_mu_pt_min_low","Signal muon low pt_min",50,0.,100.);
-    //m_dv_mumu_mu_pt_max = new TH1F("dv_mumu_mu_pt_max","Signal muon pt_max",50,0.,1000.);
-    //m_dv_mumu_mu_pt_max_low = new TH1F("dv_mumu_mu_pt_max_low","Signal muon low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_mumu_DeltaR = new TH1F("dv_mumu_DeltaR","Signal muon Delta R",100, 0., 5.);
-    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",100, 0., 1);
+    m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",60, 0., 1);
     m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",50, 0., 5.);
-    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",25, 0., 0.1);
-    m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 500,0,5,100,0,5);
+    m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",1000, 0., 0.1);
+    m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
 
     // only for MC
     m_dv_mumu_M_matched = new TH1F("dv_mumu_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
@@ -113,39 +109,35 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_mumu_eta_matched = new TH1F("dv_mumu_eta_matched","eta of dimuon dv",40,-4.,4.);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_cf", m_dv_mumu_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_M", m_dv_mumu_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R", m_dv_mumu_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_low", m_dv_mumu_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_z", m_dv_mumu_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_l", m_dv_mumu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_R_M", m_dv_mumu_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/dv_mumu_chi2_ndof", m_dv_mumu_chi2_ndof) );
 
     // muon kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt", m_dv_mumu_mu_pt) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_low", m_dv_mumu_mu_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min", m_dv_mumu_mu_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_min_low", m_dv_mumu_mu_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max", m_dv_mumu_mu_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_pt_max_low", m_dv_mumu_mu_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_eta", m_dv_mumu_mu_eta) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_phi", m_dv_mumu_mu_phi) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_d0", m_dv_mumu_mu_d0) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/outgoing/dv_mumu_mu_z0", m_dv_mumu_mu_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_pt", m_dv_mumu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_pt_low", m_dv_mumu_mu_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_eta", m_dv_mumu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_phi", m_dv_mumu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_d0", m_dv_mumu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/outgoing/dv_mumu_mu_z0", m_dv_mumu_mu_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR", m_dv_mumu_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR_low", m_dv_mumu_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos", m_dv_mumu_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_Rcos_low", m_dv_mumu_Rcos_low) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/cv/dv_mumu_DeltaR_Rcos", m_dv_mumu_DeltaR_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR", m_dv_mumu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR_low", m_dv_mumu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_Rcos", m_dv_mumu_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_Rcos_low", m_dv_mumu_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/mumu/dv_mumu_DeltaR_Rcos", m_dv_mumu_DeltaR_Rcos) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_mumu/truth-matched/truth_dv_zp_eta", m_dv_mumu_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_M", m_dv_mumu_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_R", m_dv_mumu_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/reco_dv_mumu_R_M", m_dv_mumu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mumu/truth-matched/truth_dv_zp_eta", m_dv_mumu_eta_matched) );
 
     //--------------------------------------------------------
     // ee
@@ -167,10 +159,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_ee_e_phi = new TH1F("dv_ee_e_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_ee_e_d0 = new TH1F("dv_ee_e_d0","Signal electron d0",50,-300,300);
     m_dv_ee_e_z0 = new TH1F("dv_ee_e_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_ee_e_pt_min = new TH1F("dv_ee_e_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_ee_e_pt_min_low = new TH1F("dv_ee_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_ee_e_pt_max = new TH1F("dv_ee_e_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_ee_e_pt_max_low = new TH1F("dv_ee_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_ee_DeltaR = new TH1F("dv_ee_DeltaR","Signal ee Delta R",100, 0., 5.);
@@ -186,38 +174,34 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_ee_chi2_ndof = new TH1F("dv_ee_chi2_ndof", "chi^2 / ndof (ee)", 100, 0, 10);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_cf", m_dv_ee_cf) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_M", m_dv_ee_M) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R", m_dv_ee_R) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_z", m_dv_ee_z) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_l", m_dv_ee_l) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_cf", m_dv_ee_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_M", m_dv_ee_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R", m_dv_ee_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_low", m_dv_ee_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_z", m_dv_ee_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_l", m_dv_ee_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_R_M", m_dv_ee_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/dv_ee_chi2_ndof", m_dv_ee_chi2_ndof) );
 
     // electron kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt", m_dv_ee_e_pt) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_low", m_dv_ee_e_pt_low) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min", m_dv_ee_e_pt_min) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_min_low", m_dv_ee_e_pt_min_low) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max", m_dv_ee_e_pt_max) );
-    //CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_pt_max_low", m_dv_ee_e_pt_max_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_eta", m_dv_ee_e_eta) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_phi", m_dv_ee_e_phi) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_d0", m_dv_ee_e_d0) );
-    CHECK( histSvc->regHist("/DV/dv_ee/outgoing/dv_ee_e_z0", m_dv_ee_e_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_pt", m_dv_ee_e_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_pt_low", m_dv_ee_e_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_eta", m_dv_ee_e_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_phi", m_dv_ee_e_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_d0", m_dv_ee_e_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/outgoing/dv_ee_e_z0", m_dv_ee_e_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR", m_dv_ee_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_DeltaR_low", m_dv_ee_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos", m_dv_ee_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_ee/cv/dv_ee_Rcos_low", m_dv_ee_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_DeltaR", m_dv_ee_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_DeltaR_low", m_dv_ee_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_Rcos", m_dv_ee_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/ee/dv_ee_Rcos_low", m_dv_ee_Rcos_low) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_ee/truth-matched/truth_dv_zp_eta", m_dv_ee_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_M", m_dv_ee_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_R", m_dv_ee_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/reco_dv_ee_R_M", m_dv_ee_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_ee/truth-matched/truth_dv_zp_eta", m_dv_ee_eta_matched) );
 
     //--------------------------------------------------------
     // emu
@@ -239,10 +223,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_e_phi = new TH1F("dv_emu_e_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_emu_e_d0 = new TH1F("dv_emu_e_d0","Signal electron d0",50,-300,300);
     m_dv_emu_e_z0 = new TH1F("dv_emu_e_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_emu_e_pt_min = new TH1F("dv_emu_e_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_emu_e_pt_min_low = new TH1F("dv_emu_e_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_emu_e_pt_max = new TH1F("dv_emu_e_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_emu_e_pt_max_low = new TH1F("dv_emu_e_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     m_dv_emu_mu_pt = new TH1F("dv_emu_mu_pt","Signal electron pT",50,0.,1000.);
     m_dv_emu_mu_pt_low = new TH1F("dv_emu_mu_pt_low","Signal electron low pT",50,0.,100.);
@@ -250,10 +230,6 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_mu_phi = new TH1F("dv_emu_mu_phi","Signal electron phi",50,-M_PI,M_PI);
     m_dv_emu_mu_d0 = new TH1F("dv_emu_mu_d0","Signal electron d0",50,-300,300);
     m_dv_emu_mu_z0 = new TH1F("dv_emu_mu_z0","Signal electron z0",50,-1000,1000);
-    //m_dv_emu_mu_pt_min = new TH1F("dv_emu_mu_pt_min","Signal electron pt_min",50,0.,1000.);
-    //m_dv_emu_mu_pt_min_low = new TH1F("dv_emu_mu_pt_min_low","Signal electron low pt_min",50,0.,100.);
-    //m_dv_emu_mu_pt_max = new TH1F("dv_emu_mu_pt_max","Signal electron pt_max",50,0.,1000.);
-    //m_dv_emu_mu_pt_max_low = new TH1F("dv_emu_mu_pt_max_low","Signal electron low pt_max",50,0.,100.);
 
     // cosmic veto
     m_dv_emu_DeltaR = new TH1F("dv_emu_DeltaR","Signal emu Delta R",100, 0., 5.);
@@ -269,45 +245,45 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_emu_chi2_ndof = new TH1F("dv_emu_chi2_ndof", "chi^2 / ndof (emu)", 100, 0, 10);
 
     // registor for output
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_cf", m_dv_emu_cf) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_M", m_dv_emu_M) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R", m_dv_emu_R) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_z", m_dv_emu_z) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_l", m_dv_emu_l) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
-    CHECK( histSvc->regHist("/DV/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_cf", m_dv_emu_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_M", m_dv_emu_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R", m_dv_emu_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_low", m_dv_emu_R_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_z", m_dv_emu_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_l", m_dv_emu_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_R_M", m_dv_emu_R_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/dv_emu_chi2_ndof", m_dv_emu_chi2_ndof) );
 
     // electron kinematics distribution
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_e_z0", m_dv_emu_e_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_pt", m_dv_emu_e_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_pt_low", m_dv_emu_e_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_eta", m_dv_emu_e_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_phi", m_dv_emu_e_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_d0", m_dv_emu_e_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_e_z0", m_dv_emu_e_z0) );
 
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
-    CHECK( histSvc->regHist("/DV/dv_emu/outgoing/dv_emu_mu_z0", m_dv_emu_mu_z0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_pt", m_dv_emu_mu_pt) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_pt_low", m_dv_emu_mu_pt_low) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_eta", m_dv_emu_mu_eta) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_phi", m_dv_emu_mu_phi) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_d0", m_dv_emu_mu_d0) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/outgoing/dv_emu_mu_z0", m_dv_emu_mu_z0) );
 
     // cosmic veto
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR", m_dv_emu_DeltaR) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_DeltaR_low", m_dv_emu_DeltaR_low) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos", m_dv_emu_Rcos) );
-    CHECK( histSvc->regHist("/DV/dv_emu/cv/dv_emu_Rcos_low", m_dv_emu_Rcos_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_DeltaR", m_dv_emu_DeltaR) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_DeltaR_low", m_dv_emu_DeltaR_low) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_Rcos", m_dv_emu_Rcos) );
+    CHECK( histSvc->regHist("/DV/cosmicBkg/emu/dv_emu_Rcos_low", m_dv_emu_Rcos_low) );
 
     // only for MC
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
-    CHECK( histSvc->regHist("/DV/dv_emu/truth-matched/truth_dv_zp_eta", m_dv_emu_eta_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_M", m_dv_emu_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_R", m_dv_emu_R_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/reco_dv_emu_R_M", m_dv_emu_R_M_matched) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_emu/truth-matched/truth_dv_zp_eta", m_dv_emu_eta_matched) );
 
 
     //--------------------------------------------------------
-    // trk plots
+    // trk-trk vertex plots
     //--------------------------------------------------------
     m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 12,0,12);
     m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000, 0, 2000. );
@@ -333,29 +309,29 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     m_dv_et_l = new TH1F("dv_et_l","l [mm]", 20, 0., 1000.);
     m_dv_et_chi2_ndof = new TH1F("dv_et_chi2_ndof","chi^2 / ndof", 20, 0.,5.);
 
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_cf", m_dv_idid_cf) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_M", m_dv_idid_M) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_R", m_dv_idid_R) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_z", m_dv_idid_z) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_deltaR", m_dv_idid_deltaR) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_l", m_dv_idid_l) );
-    CHECK( histSvc->regHist("/DV/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_cf", m_dv_idid_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_M", m_dv_idid_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_R", m_dv_idid_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_z", m_dv_idid_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_deltaR", m_dv_idid_deltaR) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_l", m_dv_idid_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_chi2_ndof", m_dv_idid_chi2_ndof) );
 
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_cf", m_dv_mut_cf) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_M", m_dv_mut_M) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_R", m_dv_mut_R) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_z", m_dv_mut_z) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_deltaR", m_dv_mut_deltaR) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_l", m_dv_mut_l) );
-    CHECK( histSvc->regHist("/DV/dv_mut/dv_mut_chi2_ndof", m_dv_mut_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_cf", m_dv_mut_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_M", m_dv_mut_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_R", m_dv_mut_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_z", m_dv_mut_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_deltaR", m_dv_mut_deltaR) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_l", m_dv_mut_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_chi2_ndof", m_dv_mut_chi2_ndof) );
 
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_cf", m_dv_et_cf) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_M", m_dv_et_M) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_R", m_dv_et_R) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_z", m_dv_et_z) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_deltaR", m_dv_et_deltaR) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_l", m_dv_et_l) );
-    CHECK( histSvc->regHist("/DV/dv_et/dv_et_chi2_ndof", m_dv_et_chi2_ndof) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_cf", m_dv_et_cf) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_M", m_dv_et_M) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_R", m_dv_et_R) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_z", m_dv_et_z) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_deltaR", m_dv_et_deltaR) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_l", m_dv_et_l) );
+    CHECK( histSvc->regHist("/DV/main_analysis/dv_et/dv_et_chi2_ndof", m_dv_et_chi2_ndof) );
 
     return StatusCode::SUCCESS;
 }
@@ -499,7 +475,14 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
-        //auto vxtype = m_dvc->GetType(*dv);
+
+        // fill 2 tkr vertex
+        m_dv_mumu_cf->Fill("vertex", 1);
+        m_dv_ee_cf->Fill("vertex", 1);
+        m_dv_emu_cf->Fill("vertex", 1);
+        m_dv_mut_cf->Fill("vertex", 1);
+        m_dv_et_cf->Fill("vertex", 1);
+        m_dv_idid_cf->Fill("vertex", 1);
 
         if (channel == "mumu") {
 

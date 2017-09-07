@@ -64,6 +64,9 @@ use AtlasROOT                   AtlasROOT-*                     External
 # DV
 use DDLCombBkg                  DDLCombBkg-*                       
 
+# vertex filtter
+use TrkVKalVrtFitter            TrkVKalVrtFitter-*              Tracking/TrkVertexFitter
+
 # for StoreGate dump
 #use  StoreGate                  StoreGate-*                     Control
 

@@ -17,8 +17,13 @@ DECLARE_TOOL_FACTORY( DVUtils )
 DECLARE_TOOL_FACTORY( LeptonSelectionTools )
 DECLARE_TOOL_FACTORY( CosmicTools )
 
+
+#include "../VertexingSystematics.h"
+DECLARE_ALGORITHM_FACTORY( VertexingSystematics )
+
 DECLARE_FACTORY_ENTRIES( DispDilepAthena ) 
 {
+  DECLARE_ALGORITHM( VertexingSystematics );
   //DECLARE_ALGORITHM( DispDilepAthenaAlg );
   DECLARE_ALGORITHM( FlipBkgEst );
   DECLARE_ALGORITHM( DisplacedDimuonAnalysisAlg )

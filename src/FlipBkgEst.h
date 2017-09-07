@@ -116,18 +116,24 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         // vertex distribution
         TH1F* m_mumu_noflip_R; //!
         TH1F* m_mumu_noflip_z; //!
+        TH1F* m_mumu_noflip_M; //!
         TH1F* m_mumu_flip_R; //!
         TH1F* m_mumu_flip_z; //!
+        TH1F* m_mumu_flip_M; //!
 
         TH1F* m_ee_noflip_R; //!
         TH1F* m_ee_noflip_z; //!
+        TH1F* m_ee_noflip_M; //!
         TH1F* m_ee_flip_R; //!
         TH1F* m_ee_flip_z; //!
+        TH1F* m_ee_flip_M; //!
 
         TH1F* m_emu_noflip_R; //!
         TH1F* m_emu_noflip_z; //!
+        TH1F* m_emu_noflip_M; //!
         TH1F* m_emu_flip_R; //!
         TH1F* m_emu_flip_z; //!
+        TH1F* m_emu_flip_M; //!
 
         TH1F* m_idid_noflip_R; //!
         TH1F* m_idid_noflip_z; //!
