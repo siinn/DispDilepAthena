@@ -8,6 +8,7 @@
 #include "xAODMuon/MuonContainer.h"
 //#include "xAODMuon/MuonAuxContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include <string>
 
 
@@ -31,6 +32,7 @@ class IDVUtils: virtual public IAlgTool {
 
         // get decay channel
         virtual std::string DecayChannel(xAOD::Vertex& dv) = 0;
+        //virtual std::string DecayChannel(const xAOD::TrackParticle* tp1, const xAOD::TrackParticle* tp2) = 0;
 
         // trig matching
         virtual bool TrigMatching(xAOD::Vertex& dv) = 0;
@@ -101,6 +103,14 @@ class IDVUtils: virtual public IAlgTool {
         // track selection for validation
         virtual bool TrackSelection (const xAOD::TrackParticle* tp) = 0;
         virtual bool TrackSelection (const xAOD::TruthParticle* tp) = 0;
+
+        // check if there is an associated lepton
+        //virtual bool IsLepton(const xAOD::TrackParticle* tp) = 0;
+        //virtual bool IsGoodMuon(const xAOD::TrackParticle* tp) = 0;
+        //virtual bool IsGoodElectron(const xAOD::TrackParticle* tp) = 0;
+
+        // RPVLL filter test
+        virtual bool PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc) = 0;
     
     private:
     

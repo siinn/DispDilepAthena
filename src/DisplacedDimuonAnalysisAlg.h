@@ -30,6 +30,9 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 
+// Track to vertex 
+#include "ITrackToVertex/ITrackToVertex.h"
+
 class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm { 
     public: 
 
@@ -64,6 +67,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         ToolHandle<ICosmicTools> m_costool; //!
         ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
+        ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
@@ -95,10 +99,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mumu_mu_phi; //!
             TH1F* m_dv_mumu_mu_d0; //!
             TH1F* m_dv_mumu_mu_z0; //!
-            //TH1F* m_dv_mumu_mu_pt_min; //!
-            //TH1F* m_dv_mumu_mu_pt_min_low; //!
-            //TH1F* m_dv_mumu_mu_pt_max; //!
-            //TH1F* m_dv_mumu_mu_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_mumu_DeltaR; //!
@@ -136,10 +136,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_ee_e_phi; //!
             TH1F* m_dv_ee_e_d0; //!
             TH1F* m_dv_ee_e_z0; //!
-            //TH1F* m_dv_ee_e_pt_min; //!
-            //TH1F* m_dv_ee_e_pt_min_low; //!
-            //TH1F* m_dv_ee_e_pt_max; //!
-            //TH1F* m_dv_ee_e_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_ee_DeltaR; //!
@@ -176,10 +172,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_e_phi; //!
             TH1F* m_dv_emu_e_d0; //!
             TH1F* m_dv_emu_e_z0; //!
-            //TH1F* m_dv_emu_e_pt_min; //!
-            //TH1F* m_dv_emu_e_pt_min_low; //!
-            //TH1F* m_dv_emu_e_pt_max; //!
-            //TH1F* m_dv_emu_e_pt_max_low; //!
 
             TH1F* m_dv_emu_mu_pt; //!
             TH1F* m_dv_emu_mu_pt_low; //!
@@ -187,10 +179,6 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_emu_mu_phi; //!
             TH1F* m_dv_emu_mu_d0; //!
             TH1F* m_dv_emu_mu_z0; //!
-            //TH1F* m_dv_emu_mu_pt_min; //!
-            //TH1F* m_dv_emu_mu_pt_min_low; //!
-            //TH1F* m_dv_emu_mu_pt_max; //!
-            //TH1F* m_dv_emu_mu_pt_max_low; //!
 
             // cosmic veto
             TH1F* m_dv_emu_DeltaR; //!
@@ -231,14 +219,43 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_idid_z; //!
             TH1F* m_dv_idid_R; //!
             TH1F* m_dv_idid_l; //!
+            TH1F* m_dv_idid_n_tracks; //!
             TH1F* m_dv_idid_chi2_ndof; //!
             TH1F* m_dv_idid_deltaR; //!
+
+            // track parameters
+            TH1F* m_track_p; //!
+            TH1F* m_track_pt; //!
+            TH1F* m_track_z0; //!
+            TH1F* m_track_d0; //!
+            TH1F* m_track_phi; //!
+            TH1F* m_track_theta; //!
+            TH1F* m_track_d0sigma; //!
+            TH1F* m_track_z0sigma; //!
+            TH1F* m_track_d0_over_d0sigma; //!
+            TH1F* m_track_z0_over_z0sigma; //!
+
+            TH1F* m_track_p_wrtSV; //!
+            TH1F* m_track_pt_wrtSV; //!
+            TH1F* m_track_z0_wrtSV; //!
+            TH1F* m_track_d0_wrtSV; //!
+            TH1F* m_track_phi_wrtSV; //!
+            TH1F* m_track_theta_wrtSV; //!
+            TH1F* m_track_d0sigma_wrtSV; //!
+            TH1F* m_track_z0sigma_wrtSV; //!
+            TH1F* m_track_d0_over_d0sigma_wrtSV; //!
+            TH1F* m_track_z0_over_z0sigma_wrtSV; //!
 
             int n_event_all = 0;
             int n_vrtsec_all = 0;
             int n_dvc_copy = 0;
             int n_dv_all = 0;
             int n_dv_passed_cut = 0;
+
+            // counting selected tracks
+            int n_trk_sel = 0;
+            int n_mu_sel = 0;
+            int n_el_sel = 0;
     
 }; 
 

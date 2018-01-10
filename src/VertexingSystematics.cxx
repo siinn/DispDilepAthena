@@ -494,4 +494,3 @@ void VertexingSystematics::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParti
         }
     }
 }
-

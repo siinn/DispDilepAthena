@@ -31,7 +31,6 @@ use ElectronPhotonSelectorTools ElectronPhotonSelectorTools-*   PhysicsAnalysis/
 use MuonSelectorTools           MuonSelectorTools-*             PhysicsAnalysis/MuonID
 use MuonMomentumCorrections     MuonMomentumCorrections-*       PhysicsAnalysis/MuonID/MuonIDAnalysis
 
-
 #-------------------------------------------------------
 # private
 #-------------------------------------------------------
@@ -66,6 +65,9 @@ use DDLCombBkg                  DDLCombBkg-*
 
 # vertex filtter
 use TrkVKalVrtFitter            TrkVKalVrtFitter-*              Tracking/TrkVertexFitter
+
+# track to vertex
+use ITrackToVertex              ITrackToVertex-*                Reconstruction/RecoTools
 
 # for StoreGate dump
 #use  StoreGate                  StoreGate-*                     Control

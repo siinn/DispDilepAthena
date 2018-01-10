@@ -17,12 +17,16 @@
 #include "DDLBase/IDiLepDVCuts.h"
 #include "DDLBase/ITrigMatch.h"
 
+// lepton tool
+#include "DispDilepAthena/LeptonSelectionTools.h"
+
 #include "xAODTracking/Vertex.h"
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODMuon/MuonContainer.h"
 //#include "xAODMuon/MuonAuxContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
+#include "xAODEgamma/PhotonContainer.h"
 #include <string>
 
 class DVUtils : public AthAlgTool, virtual public IDVUtils {
@@ -42,6 +46,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
 
         // get decay channel
         std::string DecayChannel(xAOD::Vertex& dv);
+        //std::string DecayChannel(const xAOD::TrackParticle* tp1, const xAOD::TrackParticle* tp2);
 
         // trig matching
         bool TrigMatching(xAOD::Vertex& dv);
@@ -49,8 +54,6 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         // reco dv is matched to signal truth dv
         const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv);
-
-        // truth tools --------------------------
 
         // reco match using id track barcode
         bool IsReconstructedAsMuon(const xAOD::TruthParticle* tp);
@@ -111,6 +114,15 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         bool TrackSelection (const xAOD::TrackParticle* tp);
         bool TrackSelection (const xAOD::TruthParticle* tp);
 
+        // check if there is an associated lepton
+        //bool IsLepton (const xAOD::TrackParticle* tp);
+        //bool IsGoodMuon (const xAOD::TrackParticle* tp);
+        //bool IsGoodElectron (const xAOD::TrackParticle* tp);
+
+        // RPVLL filter test
+        bool PassRPVLLFilter(const xAOD::ElectronContainer& elc, const xAOD::PhotonContainer& phc,const xAOD::MuonContainer& muc);
+
+
         // accessor for original ID track
         SG::AuxElement::Accessor<ElementLink<xAOD::TrackParticleContainer>> m_accTr;
 
@@ -125,6 +137,7 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         ToolHandle<Trig::IMatchingTool> m_tmt;
         ToolHandle<DDL::ITrigMatch> m_trig;
         ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<ILeptonSelectionTools> m_leptool; //!
 
 
 };

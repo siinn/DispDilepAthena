@@ -22,8 +22,9 @@
 // tools
 #include "PathResolver/PathResolver.h"
 
-// for M_PI
+// standard library
 #include "cmath"
+#include <random>
 
 // debug
 #include <typeinfo>
@@ -46,7 +47,9 @@ m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
 m_vertexer("DDL::DispVertexer/DispVertexer"),
 m_acc_p4("DDL_p4"),
-m_accMass("mass")
+m_accMass("mass"),
+m_trackToVertexTool("Reco::TrackToVertex"),
+m_fitsvc("Trk::TrkVKalVrtFitter/VxFitter")
 {
     // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
@@ -62,6 +65,8 @@ m_accMass("mass")
     declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
     declareProperty("Vertexer", m_vertexer);
+    declareProperty ("TrackToVertexTool", m_trackToVertexTool);
+    declareProperty ("TrkVKalVrtFitter", m_fitsvc);
 }
 
 
@@ -72,87 +77,132 @@ StatusCode FlipBkgEst::initialize() {
     ATH_MSG_INFO ("Initializing " << name() << "...");
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
-    m_n_mu = new TH1D( "m_n_mu", "Number of muons in event", 100,0,100);
-    m_n_elc = new TH1D( "m_n_elc", "Number of electrons in event", 100,0,100);
-    m_n_id = new TH1D( "m_n_id", "Number id tracks in event", 300,0,300);
+    m_n_mu = new TH1D( "m_n_mu", "Number of muons in event", 1000,0,1000);
+    m_n_elc = new TH1D( "m_n_elc", "Number of electrons in event", 1000,0,1000);
+    m_n_id = new TH1D( "m_n_id", "Number id tracks in event", 1000,0,1000);
 
     m_n_mu_sel = new TH1D( "m_n_mu_sel", "Number of selected muons in event", 100,0,100);
     m_n_elc_sel = new TH1D( "m_n_elc_sel", "Number of selected electrons in event", 100,0,100);
-    m_n_id_sel = new TH1D( "m_n_id_sel", "Number of selected id tracks in event", 300,0,300);
+    m_n_id_sel = new TH1D( "m_n_id_sel", "Number of selected id tracks in event", 500,0,500);
 
-    m_mumu_cf_input = new TH1D( "m_mumu_cf_input", "Input mumu cutflow", 12,0,12);
-    m_mumu_cf_noflip = new TH1D( "m_mumu_cf_noflip", "mumu cutflow (no flip)", 12,0,12);
-    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 12,0,12);
+    m_mumu_cf_noflip = new TH1D( "m_mumu_cf_noflip", "mumu cutflow (no flip)", 9,0,9);
+    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 9,0,9);
 
-    m_ee_cf_input = new TH1D( "m_ee_cf_input", "Input ee cutflow", 12,0,12);
-    m_ee_cf_noflip = new TH1D( "m_ee_cf_noflip", "ee cutflow (no flip)", 12,0,12);
-    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 12,0,12);
+    m_ee_cf_noflip = new TH1D( "m_ee_cf_noflip", "ee cutflow (no flip)", 9,0,9);
+    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 9,0,9);
 
-    m_emu_cf_input = new TH1D( "m_emu_cf_input", "Input emu cutflow", 12,0,12);
-    m_emu_cf_noflip = new TH1D( "m_emu_cf_noflip", "emu cutflow (no flip)", 12,0,12);
-    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 12,0,12);
+    m_emu_cf_noflip = new TH1D( "m_emu_cf_noflip", "emu cutflow (no flip)", 9,0,9);
+    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 9,0,9);
 
-    m_idid_cf_input = new TH1D( "m_idid_cf_input", "Input idid cutflow", 12,0,12);
-    m_idid_cf_noflip = new TH1D( "m_idid_cf_noflip", "idid cutflow (no flip)", 12,0,12);
-    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 12,0,12);
+    m_idid_cf_noflip = new TH1D( "m_idid_cf_noflip", "idid cutflow (no flip)", 8,0,8);
+    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 8,0,8);
 
-    m_mut_cf_input = new TH1D( "m_mut_cf_input", "Input mut cutflow", 12,0,12);
-    m_mut_cf_noflip = new TH1D( "m_mut_cf_noflip", "mut cutflow (no flip)", 12,0,12);
-    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 12,0,12);
+    m_mut_cf_noflip = new TH1D( "m_mut_cf_noflip", "mut cutflow (no flip)", 8,0,8);
+    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 8,0,8);
 
-    m_et_cf_input = new TH1D( "m_et_cf_input", "Input et cutflow", 12,0,12);
-    m_et_cf_noflip = new TH1D( "m_et_cf_noflip", "et cutflow (no flip)", 12,0,12);
-    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 12,0,12);
+    m_et_cf_noflip = new TH1D( "m_et_cf_noflip", "et cutflow (no flip)", 8,0,8);
+    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 8,0,8);
 
-    m_mumu_noflip_R = new TH1F( "m_mumu_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_mumu_noflip_z = new TH1F( "m_mumu_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_mumu_noflip_M = new TH1F( "m_mumu_noflip_M", "vertex M (no flip)", 100,0,1000);
-    m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 100,0,300);
-    m_mumu_flip_z = new TH1F( "m_mumu_flip_z", "vertex z (flip)", 100,-1000,1000);
-    m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 100,0,1000);
+    m_mumu_noflip_R = new TH1F( "m_mumu_noflip_R", "vertex R (no flip)", 200,0,600);
+    m_mumu_noflip_z = new TH1F( "m_mumu_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_mumu_noflip_M = new TH1F( "m_mumu_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 200,0,600);
+    m_mumu_flip_z = new TH1F( "m_mumu_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 1000,0,1000);
 
-    m_ee_noflip_R = new TH1F( "m_ee_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_ee_noflip_z = new TH1F( "m_ee_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_ee_noflip_M = new TH1F( "m_ee_noflip_M", "vertex M (no flip)", 100,0,1000);
-    m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 100,0,300);
-    m_ee_flip_z = new TH1F( "m_ee_flip_z", "vertex z (flip)", 100,-1000,1000);
-    m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 100,0,1000);
+    m_ee_noflip_R = new TH1F( "m_ee_noflip_R", "vertex R (no flip)", 200,0,600);
+    m_ee_noflip_z = new TH1F( "m_ee_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_ee_noflip_M = new TH1F( "m_ee_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 200,0,600);
+    m_ee_flip_z = new TH1F( "m_ee_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 1000,0,1000);
 
-    m_emu_noflip_R = new TH1F( "m_emu_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_emu_noflip_z = new TH1F( "m_emu_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_emu_noflip_M = new TH1F( "m_emu_noflip_M", "vertex M (no flip)", 100,0,1000);
-    m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 100,0,300);
-    m_emu_flip_z = new TH1F( "m_emu_flip_z", "vertex z (flip)", 100,-1000,1000);
-    m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 100,0,1000);
+    m_emu_noflip_R = new TH1F( "m_emu_noflip_R", "vertex R (no flip)", 200,0,600);
+    m_emu_noflip_z = new TH1F( "m_emu_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_emu_noflip_M = new TH1F( "m_emu_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 200,0,600);
+    m_emu_flip_z = new TH1F( "m_emu_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 1000,0,1000);
 
-    m_idid_noflip_R = new TH1F( "m_idid_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_idid_noflip_z = new TH1F( "m_idid_noflip_z", "vertex z (no flip)", 100,-1000,1000);
-    m_idid_flip_M = new TH1F("m_idid_flip_M","DV mass in GeV", 1000, 0, 1000. );
-    m_idid_flip_R = new TH1F( "m_idid_flip_R", "vertex R (flip)", 60,0,300);
-    m_idid_flip_z = new TH1F( "m_idid_flip_z", "vertex z (flip)", 20,-1000,1000);
-    m_idid_flip_l = new TH1F("m_idid_flip_l","vertex l (flip)", 20, 0, 1000. );
+    m_idid_noflip_M = new TH1F( "m_idid_noflip_M", "mass in GeV", 1000, 0, 1000);
+    m_idid_noflip_R = new TH1F( "m_idid_noflip_R", "vertex R (no flip)", 600,0,600);
+    m_idid_noflip_z = new TH1F( "m_idid_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_idid_noflip_l = new TH1F( "m_idid_noflip_l", "vertex l (no flip)", 100, 0, 1000.);
+    m_idid_noflip_n_tracks = new TH1F( "m_idid_noflip_n_tracks", "vertex vs track multiplicity (noflip)", 500,0,500);
+
+    m_idid_flip_M = new TH1F("m_idid_flip_M","mass in GeV", 1000, 0, 1000. );
+    m_idid_flip_R = new TH1F( "m_idid_flip_R", "vertex R (flip)", 600,0,600);
+    m_idid_flip_z = new TH1F( "m_idid_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_idid_flip_l = new TH1F("m_idid_flip_l","vertex l (flip)", 100, 0, 1000.);
+    m_idid_flip_n_tracks = new TH1F( "m_idid_flip_n_tracks", "vertex vs track multiplicity (flip)", 500,0,500);
     m_idid_flip_deltaR = new TH1F( "m_idid_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
-    m_idid_flip_chi2_ndof = new TH1F("m_idid_flip_chi2_ndof","chi2 / ndof", 20, 0, 5. );
+    m_idid_flip_chi2_ndof = new TH1F("m_idid_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
-    m_mut_noflip_R = new TH1F( "m_mut_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_mut_noflip_z = new TH1F( "m_mut_noflip_z", "vertex z (no flip)", 100,-1000,1000);
+    m_mut_noflip_R = new TH1F( "m_mut_noflip_R", "vertex R (no flip)", 600,0,600);
+    m_mut_noflip_z = new TH1F( "m_mut_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
     m_mut_flip_M = new TH1F("m_mut_flip_M","DV mass in GeV", 1000, 0, 1000. );
-    m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 60,0,300);
-    m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 20,-1000,1000);
-    m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 20, 0, 1000. );
+    m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 600,0,600);
+    m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 100, 0, 2000.);
     m_mut_flip_deltaR = new TH1F( "m_mut_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
-    m_mut_flip_chi2_ndof = new TH1F("m_mut_flip_chi2_ndof","chi2 / ndof", 20, 0, 5. );
+    m_mut_flip_chi2_ndof = new TH1F("m_mut_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
-    m_et_noflip_R = new TH1F( "m_et_noflip_R", "vertex R (no flip)", 100,0,300);
-    m_et_noflip_z = new TH1F( "m_et_noflip_z", "vertex z (no flip)", 100,-1000,1000);
+    m_et_noflip_R = new TH1F( "m_et_noflip_R", "vertex R (no flip)", 600,0,600);
+    m_et_noflip_z = new TH1F( "m_et_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
     m_et_flip_M = new TH1F("m_et_flip_M","DV mass in GeV", 1000, 0, 1000. );
-    m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 60,0,300);
-    m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 20,-1000,1000);
-    m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 20, 0, 1000. );
+    m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 600,0,600);
+    m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 1000,-1000,1000);
+    m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 100, 0, 2000.);
     m_et_flip_deltaR = new TH1F( "m_et_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
-    m_et_flip_chi2_ndof = new TH1F("m_et_flip_chi2_ndof","chi2 / ndof", 20, 0, 5. );
+    m_et_flip_chi2_ndof = new TH1F("m_et_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
+
+    // Track parameters
+    m_track_noflip_p = new TH1F( "m_track_noflip_p", "track p", 10000,0,1000);
+    m_track_noflip_pt = new TH1F( "m_track_noflip_pt", "track pt", 10000,0,1000);
+    m_track_noflip_z0 = new TH1F( "m_track_noflip_z0", "track z0", 2000,-1000,1000);
+    m_track_noflip_d0 = new TH1F( "m_track_noflip_d0", "track d0", 600,-300,300);
+    m_track_noflip_phi = new TH1F( "m_track_noflip_phi", "track phi", 1000,-M_PI,M_PI);
+    m_track_noflip_theta = new TH1F( "m_track_noflip_theta", "track theta", 200,0,M_PI);
+    m_track_noflip_d0sigma = new TH1F( "m_track_noflip_d0sigma", "d0sigma (no flip)", 500,0,50);
+    m_track_noflip_z0sigma = new TH1F( "m_track_noflip_z0sigma", "z0sigma (no flip)", 2000,-100,100);
+    m_track_noflip_d0_over_d0sigma = new TH1F( "m_track_noflip_d0_d0sigma", "d0/d0sigma (no flip)", 500,0,50);
+    m_track_noflip_z0_over_z0sigma = new TH1F( "m_track_noflip_z0_z0sigma", "z0/z0sigma (no flip)", 2000,-100,100);
+
+    m_track_noflip_p_wrtSV = new TH1F( "m_track_noflip_p_wrtSV", "track p_wrtSV", 10000,0,1000);
+    m_track_noflip_pt_wrtSV = new TH1F( "m_track_noflip_pt_wrtSV", "track pt_wrtSV", 10000,0,1000);
+    m_track_noflip_z0_wrtSV = new TH1F( "m_track_noflip_z0_wrtSV", "track z0_wrtSV", 20000,-1000,1000);
+    m_track_noflip_d0_wrtSV = new TH1F( "m_track_noflip_d0_wrtSV", "track d0_wrtSV", 6000,-300,300);
+    m_track_noflip_phi_wrtSV = new TH1F( "m_track_noflip_phi_wrtSV", "track phi_wrtSV", 1000,-M_PI,M_PI);
+    m_track_noflip_theta_wrtSV = new TH1F( "m_track_noflip_theta_wrtSV", "track theta_wrtSV", 200,0,M_PI);
+    m_track_noflip_d0sigma_wrtSV = new TH1F( "m_track_noflip_d0sigma_wrtSV", "d0sigma_wrtSV (no flip)", 500,0,50);
+    m_track_noflip_z0sigma_wrtSV = new TH1F( "m_track_noflip_z0sigma_wrtSV", "z0sigma_wrtSV (no flip)", 2000,-100,100);
+    m_track_noflip_d0_over_d0sigma_wrtSV = new TH1F( "m_track_noflip_d0_d0sigma_wrtSV", "d0/d0sigma_wrtSV (no flip)", 500,0,50);
+    m_track_noflip_z0_over_z0sigma_wrtSV = new TH1F( "m_track_noflip_z0_z0sigma_wrtSV", "z0/z0sigma_wrtSV (no flip)", 2000,-100,100);
+
+    m_track_flip_p = new TH1F( "m_track_flip_p", "track p", 10000,0,1000);
+    m_track_flip_pt = new TH1F( "m_track_flip_pt", "track pt", 10000,0,1000);
+    m_track_flip_z0 = new TH1F( "m_track_flip_z0", "track z0", 2000,-1000,1000);
+    m_track_flip_d0 = new TH1F( "m_track_flip_d0", "track d0", 600,-300,300);
+    m_track_flip_phi = new TH1F( "m_track_flip_phi", "track phi", 1000,-M_PI,M_PI);
+    m_track_flip_theta = new TH1F( "m_track_flip_theta", "track theta", 200,0,M_PI);
+    m_track_flip_d0sigma = new TH1F( "m_track_flip_d0sigma", "d0sigma (flip)", 500,0,50);
+    m_track_flip_z0sigma = new TH1F( "m_track_flip_z0sigma", "z0sigma (flip)", 2000,-100,100);
+    m_track_flip_d0_over_d0sigma = new TH1F( "m_track_flip_d0_d0sigma", "d0/d0sigma (flip)", 500,0,50);
+    m_track_flip_z0_over_z0sigma = new TH1F( "m_track_flip_z0_z0sigma", "z0/z0sigma (flip)", 2000,-100,100);
+
+    m_track_flip_p_wrtSV = new TH1F( "m_track_flip_p_wrtSV", "track p_wrtSV", 10000,0,1000);
+    m_track_flip_pt_wrtSV = new TH1F( "m_track_flip_pt_wrtSV", "track pt_wrtSV", 10000,0,1000);
+    m_track_flip_z0_wrtSV = new TH1F( "m_track_flip_z0_wrtSV", "track z0_wrtSV", 20000,-1000,1000);
+    m_track_flip_d0_wrtSV = new TH1F( "m_track_flip_d0_wrtSV", "track d0_wrtSV", 6000,-300,300);
+    m_track_flip_phi_wrtSV = new TH1F( "m_track_flip_phi_wrtSV", "track phi_wrtSV", 1000,-M_PI,M_PI);
+    m_track_flip_theta_wrtSV = new TH1F( "m_track_flip_theta_wrtSV", "track theta_wrtSV", 200,0,M_PI);
+    m_track_flip_d0sigma_wrtSV = new TH1F( "m_track_flip_d0sigma_wrtSV", "d0sigma_wrtSV (flip)", 500,0,50);
+    m_track_flip_z0sigma_wrtSV = new TH1F( "m_track_flip_z0sigma_wrtSV", "z0sigma_wrtSV (flip)", 2000,-100,100);
+    m_track_flip_d0_over_d0sigma_wrtSV = new TH1F( "m_track_flip_d0_d0sigma_wrtSV", "d0/d0sigma_wrtSV (flip)", 500,0,50);
+    m_track_flip_z0_over_z0sigma_wrtSV = new TH1F( "m_track_flip_z0_z0sigma_wrtSV", "z0/z0sigma_wrtSV (flip)", 2000,-100,100);
 
 
+    // register histograms
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_mu", m_n_mu) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_elc", m_n_elc) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_id", m_n_id) );
@@ -160,27 +210,21 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_elc_sel", m_n_elc_sel) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_id_sel", m_n_id_sel) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_input", m_mumu_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_noflip", m_mumu_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_flip", m_mumu_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_input", m_ee_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_noflip", m_ee_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_flip", m_ee_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_input", m_emu_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_noflip", m_emu_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_flip", m_emu_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_input", m_idid_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_noflip", m_idid_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_flip", m_idid_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_input", m_mut_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_noflip", m_mut_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_flip", m_mut_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_input", m_et_cf_input) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_noflip", m_et_cf_noflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_flip", m_et_cf_flip) );
 
@@ -206,12 +250,17 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_z", m_emu_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_M", m_emu_flip_M) );
 
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_M", m_idid_noflip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_R", m_idid_noflip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_z", m_idid_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_l", m_idid_noflip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_n_tracks", m_idid_noflip_n_tracks) );
+
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_M", m_idid_flip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_R", m_idid_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_z", m_idid_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_l", m_idid_flip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_n_tracks", m_idid_flip_n_tracks) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_deltaR", m_idid_flip_deltaR) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_chi2_ndof", m_idid_flip_chi2_ndof) );
 
@@ -233,17 +282,86 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_deltaR", m_et_flip_deltaR) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_chi2_ndof", m_et_flip_chi2_ndof) );
 
+    // track parameters
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_p", m_track_noflip_p) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_pt", m_track_noflip_pt) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0", m_track_noflip_z0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0", m_track_noflip_d0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_phi", m_track_noflip_phi) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_theta", m_track_noflip_theta) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0sigma", m_track_noflip_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0sigma", m_track_noflip_z0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0_over_d0sigma", m_track_noflip_d0_over_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0_over_z0sigma", m_track_noflip_z0_over_z0sigma) );
+
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_p_wrtSV", m_track_noflip_p_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_pt_wrtSV", m_track_noflip_pt_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0_wrtSV", m_track_noflip_z0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0_wrtSV", m_track_noflip_d0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_phi_wrtSV", m_track_noflip_phi_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_theta_wrtSV", m_track_noflip_theta_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0sigma_wrtSV", m_track_noflip_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0sigma_wrtSV", m_track_noflip_z0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0_over_d0sigma_wrtSV", m_track_noflip_d0_over_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0_over_z0sigma_wrtSV", m_track_noflip_z0_over_z0sigma_wrtSV) );
+
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_p", m_track_flip_p) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_pt", m_track_flip_pt) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_z0", m_track_flip_z0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_d0", m_track_flip_d0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_phi", m_track_flip_phi) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_theta", m_track_flip_theta) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_d0sigma", m_track_flip_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_z0sigma", m_track_flip_z0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_d0_over_d0sigma", m_track_flip_d0_over_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_z0_over_z0sigma", m_track_flip_z0_over_z0sigma) );
+
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_p_wrtSV", m_track_flip_p_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_pt_wrtSV", m_track_flip_pt_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_z0_wrtSV", m_track_flip_z0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_d0_wrtSV", m_track_flip_d0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_phi_wrtSV", m_track_flip_phi_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_theta_wrtSV", m_track_flip_theta_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_d0sigma_wrtSV", m_track_flip_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_z0sigma_wrtSV", m_track_flip_z0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_d0_over_d0sigma_wrtSV", m_track_flip_d0_over_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_flip_z0_over_z0sigma_wrtSV", m_track_flip_z0_over_z0sigma_wrtSV) );
+
+
     // flag to check MC
     bool isMC;
 
-    int n_trk_pair = 0;
+    // retrieve primary vertices
+    const xAOD::VertexContainer* pvc = nullptr;
+
+    // count leptons with nullptr
+    int n_mu_null = 0;
+    int n_mu_valid = 0;
+    int n_el_null = 0;
+    int n_el_valid = 0;
+    int n_trk_noperigee = 0;
+
+    // counting vertex failed on refitting
+    int n_refit_flip_failed = 0;
+    int n_refit_flip_succeeded = 0;
+    int n_refit_noflip_failed = 0;
+    int n_refit_noflip_succeeded = 0;
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode FlipBkgEst::finalize() {
-    ATH_MSG_INFO("n_trk_sel = " << n_trk_sel);
-    ATH_MSG_INFO("n_tt_pair = " << n_tt_pair);
+
+    ATH_MSG_INFO("mu null = " << n_mu_null << ", mu valid = " << n_mu_valid << ", el null = " << n_el_null << ", el valid = " << n_el_valid);
+
+    ATH_MSG_INFO("n_trk_noperigee = " << n_trk_noperigee);
+
+    ATH_MSG_INFO("n_refit_noflip_failed = " << n_refit_noflip_failed);
+    ATH_MSG_INFO("n_refit_noflip_succeeded = " << n_refit_noflip_succeeded);
+    ATH_MSG_INFO("n_refit_flip_failed = " << n_refit_flip_failed);
+    ATH_MSG_INFO("n_refit_flip_succeeded = " << n_refit_flip_succeeded);
+
+
     return StatusCode::SUCCESS;
 }
 
@@ -270,7 +388,7 @@ StatusCode FlipBkgEst::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
+    //if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     if(!trig_passed) return StatusCode::SUCCESS;
 
@@ -282,8 +400,8 @@ StatusCode FlipBkgEst::execute() {
     CHECK( evtStore()->retrieve( elc, "Electrons" ));
 
     const xAOD::TrackParticleContainer* idc = nullptr;
-    CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
-    //CHECK( evtStore()->retrieve( idc, "VrtSecInclusive_SelectedTrackParticles" ));
+    //CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
+    CHECK( evtStore()->retrieve( idc, "VrtSecInclusive_SelectedTrackParticles" ));
 
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
@@ -299,24 +417,12 @@ StatusCode FlipBkgEst::execute() {
     m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
 
     // retrieve primary vertices
-    const xAOD::VertexContainer* pvc = nullptr;
+    //const xAOD::VertexContainer* pvc = nullptr;
     CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
 
     // get primary vertex
     auto pv = m_evtc->GetPV(*pvc);
     auto pv_pos = m_evtc->GetPV(*pvc)->position();
-
-    // retrieve secondary vertices
-    const xAOD::VertexContainer* dvc = nullptr;
-    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
-
-    // make a copy of vertex containers
-    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
-
-    // perform lepton matching
-    for(auto dv: *dvc_copy.first) {
-        m_dilepdvc->ApplyLeptonMatching(*dv, *elc_copy.first, *muc_copy.first);
-    }
 
     // create container for good tracks
     auto el_sel     = new xAOD::TrackParticleContainer();
@@ -335,6 +441,9 @@ StatusCode FlipBkgEst::execute() {
     m_n_elc->Fill(elc->size());
     m_n_id->Fill(idc->size());
 
+    int n_trk_sel = 0;
+    int n_mu_sel = 0;
+    int n_el_sel = 0;
 
     //-----------------------------------
     // track selection and deep copy
@@ -346,12 +455,16 @@ StatusCode FlipBkgEst::execute() {
         if(m_or->IsOverlap(*mu)) continue;
 
         // apply muon selection
-        //if(!mu->muonType() == xAOD::Muon::Combined) continue;
         if(!m_leptool->MuonSelection(*mu)) continue;
 
         // access muon ID track
         auto mu_tr = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-        if(mu_tr == nullptr) continue;
+        if(mu_tr == nullptr) {
+            n_mu_null++;
+            continue;
+        }
+        else n_mu_valid++;
+
         if(!m_vertexer->GoodTrack(*mu_tr)) continue;
 
         // copy ID track
@@ -359,21 +472,12 @@ StatusCode FlipBkgEst::execute() {
         mu_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
 
-        // decorate ID track with muon p4
-        m_acc_p4(*tr_ptr) = mu->p4();
+        // mark ID track as muon
+        mu_tr->auxdecor<int>("muon") = 1;
 
-        // add triggr matching flag to copied particle
-        // vector to check muon
-        std::vector<const xAOD::IParticle*> lep_trigCheck;
+        // count selected muon
+        n_mu_sel++;
 
-        // clear before evaluate and add muon
-        lep_trigCheck.clear();
-        lep_trigCheck.push_back(mu);
-
-        // trig matching
-        if (m_tmt->match(lep_trigCheck,"HLT_mu60_0eta105_msonly")) {
-            tr_ptr->auxdecor<int>("trig_matched") = 1;
-        }
     }
 
     for(auto el: *elc_copy.first) {
@@ -391,7 +495,12 @@ StatusCode FlipBkgEst::execute() {
 
         // access electron ID track
         auto el_tr = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
-        if(el_tr == nullptr) continue;
+        if(el_tr == nullptr) {
+            n_el_null++;
+            continue;
+        }
+        else n_el_valid++;
+
         if(!m_vertexer->GoodTrack(*el_tr)) continue;
 
         // copy ID track
@@ -399,338 +508,178 @@ StatusCode FlipBkgEst::execute() {
         el_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*el_tr, *tr_ptr);
 
-        // decorate ID track with muon p4
-        m_acc_p4(*tr_ptr) = el->p4();
+        // mark ID track as electron
+        el_tr->auxdecor<int>("electron") = 1;
 
-        // add triggr matching flag to copied particle
-        if((m_trig->Match(*el, "HLT_g140_loose"))
-            or (m_trig->Match(*el, "HLT_2g50_loose"))
-            or (m_trig->Match(*el, "HLT_2g60_loose_L12EM15VH"))){
-            tr_ptr->auxdecor<int>("trig_matched") = 1;
-        }
+        // count selected electron
+        n_el_sel++;
+
     }
 
     for(auto id_tr: *idc_copy.first) {
 
-        // remove lepton tracks
-        if(m_or->IsLeptonTrack(*id_tr)) continue;
-
         // track quality requirement
         if(!m_vertexer->GoodTrack(*id_tr)) continue;
 
-        //// copy ID track
+        // perigee requirement
+        const Trk::Perigee* perigee = &(id_tr->perigeeParameters());
+
+        if(!perigee) {
+            ATH_MSG_DEBUG("DEBUG: Found track without perigee");
+            n_trk_noperigee++;
+            continue; 
+        }
+
+        // copy ID track
         xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
         id_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*id_tr, *tr_ptr);
 
-        // count selected track
-        n_trk_sel++;
-
-        // decorate ID track with muon p4
+        // decorate track with p4
         m_acc_p4(*tr_ptr) = id_tr->p4();
 
-        // no trigger matching for InDetTrackParticles
+        // decorate track with flipping status
+        tr_ptr->auxdecor<std::string>("Flip") = "new";
+
+        // lepton flag
+        bool isLepton = false;
+
+        // get original track
+        auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*id_tr));
+        if (orig_tr == nullptr) orig_tr = id_tr;
+
+        // check if this ID track is a lepton
+        if((orig_tr)->auxdecor<int>("electron") or (orig_tr)->auxdecor<int>("muon")) isLepton = true;
+
+        // count non-leptonic selected track
+        if (!isLepton) {
+            n_trk_sel++;
+        }
 
     }
+
     // Fill selected leptons
-    m_n_mu_sel->Fill(mu_sel->size());
-    m_n_elc_sel->Fill(el_sel->size());
-    m_n_id_sel->Fill(id_sel->size());
+    m_n_mu_sel->Fill(n_mu_sel);
+    m_n_elc_sel->Fill(n_el_sel);
+    m_n_id_sel->Fill(n_trk_sel);
 
+    // Skip the event if the number of selected tracks is more than m_SelTrkMaxCutoff
+    // required in VrtSecInclusive
+    if ((mu_sel->size() + el_sel->size() + id_sel->size()) > 300) return StatusCode::SUCCESS;
 
-    //-----------------------------------
-    // loop over combination of tracks
-    // and perform vertexing
-    //-----------------------------------
     // create containers for displaced vertices
     auto dv     = new xAOD::VertexContainer();
     auto dv_aux = new xAOD::VertexAuxContainer();
-    dv->setStore(dv_aux);
 
+    dv->setStore(dv_aux);
     m_vertexer->SetVtxContainer(*dv);
 
-    // e + e
-    if(el_sel->size() > 1) {
-        // perform vertexing
-        for(auto el1_itr = el_sel->begin(); el1_itr != el_sel->end(); el1_itr++)
-        {
-            for(auto el2_itr = el1_itr+1; el2_itr != el_sel->end(); el2_itr++)
-            {
-                //// create accessor for trig match flag
-                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                //bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
-                //bool match2 = acc_lep_trig_match.isAvailable(**el2_itr);
-
-                //// skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) {
-                //    ATH_MSG_DEBUG("This pair failed trigger matching");
-                //    continue;
-                //}
-           
-                // count number of pairs
-                m_ee_cf_noflip->Fill("ee pair",1);
-                m_ee_cf_flip->Fill("ee pair",1);
-
-                auto dp = (**el1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit(**el1_itr, **el2_itr, pv_pos, "ee");
-
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
-
-                // set defining parameters to flip track
-                (**el1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**el1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit_flip(**el1_itr, **el2_itr, pv_pos, "ee");
-
-                // flip the track back
-                (**el1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**el1_itr).definingParameters();
-            }
-        }
-    }
-
-    // e + mu
-    if(el_sel->size() + mu_sel->size() > 1) {
-        // perform vertexing
-        for(auto el1_itr = el_sel->begin(); el1_itr != el_sel->end(); el1_itr++)
-        {
-            for(auto mu_itr = mu_sel->begin(); mu_itr != mu_sel->end(); mu_itr++)
-            {
-                //// create accessor for trig match flag
-                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                //bool match1 = acc_lep_trig_match.isAvailable(**el1_itr);
-                //bool match2 = acc_lep_trig_match.isAvailable(**mu_itr);
-
-                // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) {
-                //    ATH_MSG_DEBUG("This pair failed trigger matching");
-                //    continue;
-                //}
-
-                // count number of pairs
-                m_emu_cf_noflip->Fill("e#mu pair",1);
-                m_emu_cf_flip->Fill("e#mu pair",1);
-
-                auto dp = (**el1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                //ATH_MSG_INFO("Perform fit with two tracks = " << **el1_itr << ", " << **el2_itr);
-                PerformFit(**el1_itr, **mu_itr, pv_pos, "emu");
-
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
-
-                // set defining parameters to flip track
-                (**el1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**el1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit_flip(**el1_itr, **mu_itr, pv_pos, "emu");
-
-                // flip the track back
-                (**el1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**el1_itr).definingParameters();
-            }
-        }
-    }
-
-    // mu + mu
-    if(mu_sel->size() > 1) {
-        // perform vertexing
-        for(auto mu1_itr = mu_sel->begin(); mu1_itr != mu_sel->end(); mu1_itr++)
-        {
-            for(auto mu2_itr = mu1_itr+1; mu2_itr != mu_sel->end(); mu2_itr++)
-            {
-                //// create accessor for trig match flag
-                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                //bool match1 = acc_lep_trig_match.isAvailable(**mu1_itr);
-                //bool match2 = acc_lep_trig_match.isAvailable(**mu2_itr);
-
-                // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) {
-                //    ATH_MSG_DEBUG("This pair failed trigger matching");
-                //    continue;
-                //}
-
-                // count number of pairs
-                m_mumu_cf_noflip->Fill("#mu#mu pair",1);
-                m_mumu_cf_flip->Fill("#mu#mu pair",1);
-                
-                auto dp = (**mu1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit(**mu1_itr, **mu2_itr, pv_pos, "mumu");
-
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
-
-                // set defining parameters to flip track
-                (**mu1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**mu1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit_flip(**mu1_itr, **mu2_itr, pv_pos, "mumu");
-
-                // flip the track back
-                (**mu1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**mu1_itr).definingParameters();
-
-            }
-        }
-    }
-
-    // trk + trk
+    //--------------------------------------------------------
+    // loop over combinations of tracks and perform vertexing
+    //--------------------------------------------------------
     if(id_sel->size() > 1) {
         // perform vertexing
         for(auto id1_itr = id_sel->begin(); id1_itr != id_sel->end(); id1_itr++)
         {
             for(auto id2_itr = id1_itr+1; id2_itr != id_sel->end(); id2_itr++)
             {
+                // skip same charge track pair
+                if ((**id1_itr).charge() * (**id2_itr).charge() == 1) continue;
 
-                // count number of pairs
-                m_idid_cf_noflip->Fill("n-n pair",1);
-                m_idid_cf_flip->Fill("n-n pair",1);
+                // get original track
+                auto orig_tr1 = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(**id1_itr));
+                auto orig_tr2 = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(**id2_itr));
+                if (orig_tr1 == nullptr) orig_tr1 = *id1_itr;
+                if (orig_tr2 == nullptr) orig_tr2 = *id2_itr;
 
-                // counting pairs
-                n_tt_pair++;
+                // count number of leptons in this pair
+                int n_mu = 0;
+                int n_elc = 0;
 
-                // no trigger matching for id tracks pair 
-                auto dp = (**id1_itr).definingParameters();
+                if((orig_tr1)->auxdecor<int>("electron")) n_elc++;
+                if((orig_tr2)->auxdecor<int>("electron")) n_elc++;
+                if((orig_tr1)->auxdecor<int>("muon")) n_mu++;
+                if((orig_tr2)->auxdecor<int>("muon")) n_mu++;
 
-                // vertex fit of two original tracks
-                PerformFit(**id1_itr, **id2_itr, pv_pos, "idid");
+                // find vertex type
+                std::string channel = FindDecayChannel(n_mu, n_elc);
 
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
+                // fill track pair count
+                FillTrackPair(channel);
 
-                // set defining parameters to flip track
-                (**id1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**id1_itr).definingParameters();
+                // find track flip status. possible values: new, orig, flip 
+                std::string fs1 = (*id1_itr)->auxdecor<std::string>("Flip");
+                std::string fs2 = (*id2_itr)->auxdecor<std::string>("Flip");
 
-                // vertex fit of two original tracks
-                PerformFit_flip(**id1_itr, **id2_itr, pv_pos, "idid");
+                // flip track 1, leave track 2 unflipped
+                if(((fs1=="new") or (fs1=="flip")) and ((fs2=="new") or (fs2=="orig"))){
+                    ATH_MSG_DEBUG("DEBUG: flipping track 1. tr1 = " << (*id1_itr) << ", tr1 status = " << fs1 << ", tr2 = " << (*id2_itr) << ", tr2 status = " << fs2);
 
-                // flip the track back
-                (**id1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**id1_itr).definingParameters();
-            }
-        }
-    }
+                    // set track flipping status of each track
+                    (*id1_itr)->auxdecor<std::string>("Flip") = "flip";
+                    (*id2_itr)->auxdecor<std::string>("Flip") = "orig";
 
-    // mu + trk
-    if(id_sel->size() + mu_sel->size() > 1) {
-        // perform vertexing
-        for(auto id1_itr = id_sel->begin(); id1_itr != id_sel->end(); id1_itr++)
-        {
-            for(auto mu_itr = mu_sel->begin(); mu_itr != mu_sel->end(); mu_itr++)
-            {
-                // create accessor for trig match flag
-                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                //bool match1 = acc_lep_trig_match.isAvailable(**id1_itr);
-                //bool match2 = acc_lep_trig_match.isAvailable(**mu_itr);
+                    // get track parameters
+                    auto dp = (**id1_itr).definingParameters();
 
-                // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) continue;
-                //if (!(match1 or match2)) {
-                //    ATH_MSG_DEBUG("This pair failed trigger matching");
-                //    continue;
-                //}
-                // counting pairs
-                //m_mut_cf_flip->Fill("pair",1);
-                //m_mut_cf_noflip->Fill("pair",1);
+                    // vertex fit of two original tracks
+                    PerformFit(**id1_itr, **id2_itr, pv_pos, channel);
 
-                // count number of pairs
-                m_mut_cf_noflip->Fill("#mu-n pair",1);
-                m_mut_cf_flip->Fill("#mu-n pair",1);
+                    // parameters to invert
+                    float p_z = pv->z(); // primary vertex z coordinate
+                    float d0_inv = -dp[0];
+                    //float z0_inv = 2 * p_z - dp[1];
+                    float z0_inv = -dp[1];
+                    //float z0_inv = dp[1];
+                    float phi0_inv = dp[2] > 0 ? -M_PI+dp[2] : M_PI+dp[2]; // just to keep phi within [-PI,+PI]
+                    float theta_inv = M_PI - dp[3];
 
-                auto dp = (**id1_itr).definingParameters();
+                    // set defining parameters to flip track
+                    (**id1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
 
-                // vertex fit of two original tracks
-                PerformFit(**id1_itr, **mu_itr, pv_pos, "mut");
+                    // vertex fit of two original tracks
+                    PerformFit_flip(**id1_itr, **id2_itr, pv_pos, channel);
 
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
+                    // flip the track back
+                    (**id1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
+                }
 
-                // set defining parameters to flip track
-                (**id1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**id1_itr).definingParameters();
+                // flip track 2, leave track 1 unflipped
+                else if((fs1=="orig" and ((fs2=="new") or (fs2=="flip"))) or (fs1=="new" and fs2=="flip")) {
+                    ATH_MSG_DEBUG("DEBUG: flipping track 2. tr1 = " << (*id1_itr) << ", tr1 status = " << fs1 << ", tr2 = " << (*id2_itr) << ", tr2 status = " << fs2);
 
-                // vertex fit of two original tracks
-                PerformFit_flip(**id1_itr, **mu_itr, pv_pos, "mut");
+                    // set track flipping status of each track
+                    (*id1_itr)->auxdecor<std::string>("Flip") = "orig";
+                    (*id2_itr)->auxdecor<std::string>("Flip") = "flip";
 
-                // flip the track back
-                (**id1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**id1_itr).definingParameters();
-            }
-        }
-    }
+                    // get track parameters
+                    auto dp = (**id2_itr).definingParameters();
 
-    // el + trk
-    if(id_sel->size() + el_sel->size() > 1) {
-        // perform vertexing
-        for(auto id1_itr = id_sel->begin(); id1_itr != id_sel->end(); id1_itr++)
-        {
-            for(auto el_itr = el_sel->begin(); el_itr != el_sel->end(); el_itr++)
-            {
-                // create accessor for trig match flag
-                //static SG::AuxElement::ConstAccessor<int> acc_lep_trig_match("trig_matched");
-                //bool match1 = acc_lep_trig_match.isAvailable(**id1_itr);
-                //bool match2 = acc_lep_trig_match.isAvailable(**el_itr);
+                    // vertex fit of two original tracks
+                    PerformFit(**id1_itr, **id2_itr, pv_pos, channel);
 
-                // skip this pair if both lepton don't match to any trigger
-                //if (!(match1 or match2)) continue;
-                //if (!(match1 or match2)) {
-                //    ATH_MSG_DEBUG("This pair failed trigger matching");
-                //    continue;
-                //}
-                // counting pairs
-                //m_et_cf_flip->Fill("pair",1);
-                //m_et_cf_noflip->Fill("pair",1);
+                    // parameters to invert
+                    float p_z = pv->z(); // primary vertex z coordinate
+                    float d0_inv = -dp[0];
+                    //float z0_inv = 2 * p_z - dp[1];
+                    float z0_inv = -dp[1];
+                    //float z0_inv = dp[1];
+                    float phi0_inv = dp[2] > 0 ? -M_PI+dp[2] : M_PI+dp[2]; // just to keep phi within [-PI,+PI]
+                    float theta_inv = M_PI - dp[3];
 
-                // count number of pairs
-                m_et_cf_noflip->Fill("e-n pair",1);
-                m_et_cf_flip->Fill("e-n pair",1);
+                    // set defining parameters to flip track
+                    (**id2_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
 
-                auto dp = (**id1_itr).definingParameters();
+                    // vertex fit of two original tracks
+                    PerformFit_flip(**id1_itr, **id2_itr, pv_pos, channel);
 
-                // vertex fit of two original tracks
-                PerformFit(**id1_itr, **el_itr, pv_pos, "et");
+                    // flip the track back
+                    (**id2_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
+                }
+                else {
+                    ATH_MSG_INFO("DEBUG: non-physical pair. removed. tr1 = " << (*id1_itr) << ", tr1 status = " << fs1 << ", tr2 = " << (*id2_itr) << ", tr2 status = " << fs2);
 
-                // parameters to invert
-                float d0_inv = -dp[0];
-                float z0_inv = -dp[1];
-                float phi0_inv = -dp[2];
-                float theta_inv = M_PI - dp[3];
-
-                // set defining parameters to flip track
-                (**id1_itr).setDefiningParameters(d0_inv, z0_inv, phi0_inv, theta_inv, dp[4]);
-                auto dp_inverted = (**id1_itr).definingParameters();
-
-                // vertex fit of two original tracks
-                PerformFit_flip(**id1_itr, **el_itr, pv_pos, "et");
-
-                // flip the track back
-                (**id1_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
-                auto dp_back = (**id1_itr).definingParameters();
+                }
             }
         }
     }
@@ -738,7 +687,6 @@ StatusCode FlipBkgEst::execute() {
     delete dv;
     delete dv_aux;
     
-
     delete elc_copy.first;
     delete elc_copy.second;
     delete muc_copy.first;
@@ -755,7 +703,907 @@ StatusCode FlipBkgEst::beginInputFile() {
     return StatusCode::SUCCESS;
 }
 
+void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv,std::string channel)
+{
+    // create truth vertex for matching
+    const xAOD::TruthVertex *tru_matched = nullptr;
 
+    // perform vertex fit
+    ATH_MSG_DEBUG("Performing vertex fit, channel = " << channel);
+    auto fit = m_vertexer->FitVertex(tr1, tr2, pv);
+
+    // cut flow
+    if(fit) {
+
+        // refit vertex
+        if(RefitVertex(tr1, tr2, *fit)){
+        //if(true){
+
+            // count refit-succeeded vertices
+            n_refit_noflip_succeeded++;
+
+            // access position of vertices
+            auto dv_pos = fit->position();
+            auto pv_pos = m_evtc->GetPV(*pvc)->position();
+   
+            // distance in 3d vector
+            auto dist = pv_pos - dv_pos;
+   
+            // position of vertex w.r.t. pv
+            float vtx_perp = dist.perp();
+            float vtx_z = dist.z();
+            float vtx_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
+            float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+            // mass cut
+            float mass_min = 10.;
+
+            if(channel == "mumu") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_mumu_cf_noflip->Fill("#mu#mu",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_mumu_cf_noflip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("#mu^{+}#mu^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto
+                //m_mumu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_mumu_noflip_R->Fill(vtx_perp);
+                    m_mumu_noflip_z->Fill(vtx_z);
+                    m_mumu_noflip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_mumu_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+            if(channel == "emu") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+
+                if (pass_vertex) m_emu_cf_noflip->Fill("e#mu",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_emu_cf_noflip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("e^{+/-}#mu^{-/+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto (excl. mu)
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_emu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_emu_noflip_R->Fill(vtx_perp);
+                    m_emu_noflip_z->Fill(vtx_z);
+                    m_emu_noflip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_emu_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+            }
+            if(channel == "ee") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+
+                if (pass_vertex) m_ee_cf_noflip->Fill("ee",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_ee_cf_noflip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("e^{+}e^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto (excl. mu)
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_ee_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_ee_noflip_R->Fill(vtx_perp);
+                    m_ee_noflip_z->Fill(vtx_z);
+                    m_ee_noflip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_ee_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+            }
+            if(channel == "idid") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_idid_cf_noflip->Fill("xx",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("x^{+}x^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_idid_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_idid_noflip_R->Fill(vtx_perp);
+                    m_idid_noflip_z->Fill(vtx_z);
+                    m_idid_noflip_M->Fill(dv_mass);
+                    m_idid_noflip_l->Fill(vtx_l);
+
+                    // fill idid vertex vs track multiplicity
+                    m_idid_noflip_n_tracks->Fill(n_trk_sel);
+
+                    // fill track parameters wrt SV
+                    const Trk::Perigee* sv_perigee1 = m_trackToVertexTool->perigeeAtVertex(tr1, dv_pos);
+                    const Trk::Perigee* sv_perigee2 = m_trackToVertexTool->perigeeAtVertex(tr2, dv_pos);
+
+                    double tr1_d0_wrtSV        = sv_perigee1->parameters() [Trk::d0];
+                    double tr1_z0_wrtSV        = sv_perigee1->parameters() [Trk::z0];
+                    double tr1_theta_wrtSV     = sv_perigee1->parameters() [Trk::theta];
+                    double tr1_phi_wrtSV       = sv_perigee1->parameters() [Trk::phi];
+                    double tr1_qOverP_wrtSV    = sv_perigee1->parameters() [Trk::qOverP];
+                    double tr1_p_wrtSV         = 1.0 / fabs(tr1_qOverP_wrtSV) / 1000.; // GeV
+                    double tr1_pt_wrtSV        = tr1_p_wrtSV * std::sin( tr1_theta_wrtSV );
+                    double tr1_d0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::d0 );
+                    double tr1_z0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::z0 );
+                    double tr1_d0_over_d0sigma_wrtSV   = tr1_d0_wrtSV / tr1_d0sigma_wrtSV;
+                    double tr1_z0_over_z0sigma_wrtSV   = tr1_z0_wrtSV / tr1_z0sigma_wrtSV;
+
+                    double tr2_d0_wrtSV        = sv_perigee2->parameters() [Trk::d0];
+                    double tr2_z0_wrtSV        = sv_perigee2->parameters() [Trk::z0];
+                    double tr2_theta_wrtSV     = sv_perigee2->parameters() [Trk::theta];
+                    double tr2_phi_wrtSV       = sv_perigee2->parameters() [Trk::phi];
+                    double tr2_qOverP_wrtSV    = sv_perigee2->parameters() [Trk::qOverP];
+                    double tr2_p_wrtSV         = 1.0 / fabs(tr2_qOverP_wrtSV) / 1000.; // GeV
+                    double tr2_pt_wrtSV        = tr2_p_wrtSV * std::sin( tr2_theta_wrtSV );
+                    double tr2_d0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::d0 );
+                    double tr2_z0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::z0 );
+                    double tr2_d0_over_d0sigma_wrtSV   = tr2_d0_wrtSV / tr2_d0sigma_wrtSV;
+                    double tr2_z0_over_z0sigma_wrtSV   = tr2_z0_wrtSV / tr2_z0sigma_wrtSV;
+
+                    // fill track parameters wrt SV
+                    m_track_noflip_d0_wrtSV->Fill (tr1_d0_wrtSV);
+                    m_track_noflip_z0_wrtSV->Fill (tr1_z0_wrtSV);
+                    m_track_noflip_phi_wrtSV->Fill(tr1_phi_wrtSV);
+                    m_track_noflip_theta_wrtSV->Fill(tr1_theta_wrtSV);
+                    m_track_noflip_p_wrtSV->Fill(tr1_p_wrtSV);
+                    m_track_noflip_pt_wrtSV->Fill(tr1_pt_wrtSV);
+                    m_track_noflip_d0sigma_wrtSV->Fill(tr1_d0sigma_wrtSV);
+                    m_track_noflip_z0sigma_wrtSV->Fill(tr1_z0sigma_wrtSV);
+                    m_track_noflip_d0_over_d0sigma_wrtSV->Fill(tr1_d0_over_d0sigma_wrtSV);
+                    m_track_noflip_z0_over_z0sigma_wrtSV->Fill(tr1_z0_over_z0sigma_wrtSV);
+
+                    m_track_noflip_d0_wrtSV->Fill (tr2_d0_wrtSV);
+                    m_track_noflip_z0_wrtSV->Fill (tr2_z0_wrtSV);
+                    m_track_noflip_phi_wrtSV->Fill(tr2_phi_wrtSV);
+                    m_track_noflip_theta_wrtSV->Fill(tr2_theta_wrtSV);
+                    m_track_noflip_p_wrtSV->Fill(tr2_p_wrtSV);
+                    m_track_noflip_pt_wrtSV->Fill(tr2_pt_wrtSV);
+                    m_track_noflip_d0sigma_wrtSV->Fill(tr2_d0sigma_wrtSV);
+                    m_track_noflip_z0sigma_wrtSV->Fill(tr2_z0sigma_wrtSV);
+                    m_track_noflip_d0_over_d0sigma_wrtSV->Fill(tr2_d0_over_d0sigma_wrtSV);
+                    m_track_noflip_z0_over_z0sigma_wrtSV->Fill(tr2_z0_over_z0sigma_wrtSV);
+
+                    // fill track parameters wrt beam pipe
+                    double tr1_p = 1.0 / fabs(tr1.qOverP()) / 1000.; // GeV
+                    double tr1_pt = tr1_p * std::sin(tr1.theta());
+                    double tr2_p = 1.0 / fabs(tr2.qOverP()) / 1000.; // GeV
+                    double tr2_pt = tr2_p * std::sin(tr2.theta());
+                    m_track_noflip_d0->Fill(tr1.d0());
+                    m_track_noflip_z0->Fill(tr1.z0());
+                    m_track_noflip_phi->Fill(tr1.phi());
+                    m_track_noflip_theta->Fill(tr1.theta());
+                    m_track_noflip_p->Fill(tr1_p);
+                    m_track_noflip_pt->Fill(tr1_pt);
+                    m_track_noflip_d0sigma->Fill((tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_noflip_z0sigma->Fill((tr1).definingParametersCovMatrixVec()[1]);
+                    m_track_noflip_d0_over_d0sigma->Fill((tr1).definingParameters()[0] / (tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_noflip_z0_over_z0sigma->Fill((tr1).definingParameters()[1] / (tr1).definingParametersCovMatrixVec()[1]);
+
+                    m_track_noflip_d0->Fill(tr2.d0());
+                    m_track_noflip_z0->Fill(tr2.z0());
+                    m_track_noflip_phi->Fill(tr2.phi());
+                    m_track_noflip_theta->Fill(tr2.theta());
+                    m_track_noflip_p->Fill(tr2_p);
+                    m_track_noflip_pt->Fill(tr2_pt);
+                    m_track_noflip_d0sigma->Fill((tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_noflip_z0sigma->Fill((tr2).definingParametersCovMatrixVec()[1]);
+                    m_track_noflip_d0_over_d0sigma->Fill((tr2).definingParameters()[0] / (tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_noflip_z0_over_z0sigma->Fill((tr2).definingParameters()[1] / (tr2).definingParametersCovMatrixVec()[1]);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_idid_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+
+            if(channel == "mut") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_mut_cf_noflip->Fill("#mux",1);
+
+                // place holder to match with main analysis
+                //m_mut_cf_noflip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("#mu^{+,-}x^{-,+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_mut_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_mut_noflip_R->Fill(vtx_perp);
+                    m_mut_noflip_z->Fill(vtx_z);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_mut_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+
+            if(channel == "et") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_et_cf_noflip->Fill("ex",1);
+
+                // place holder to match with main analysis
+                //m_et_cf_noflip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("e^{+,-}x^{-,+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_et_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if(pass_vertex) m_et_cf_noflip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if(pass_vertex) m_et_cf_noflip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_et_noflip_R->Fill(vtx_perp);
+                    m_et_noflip_z->Fill(vtx_z);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_et_cf_noflip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+        }
+        else n_refit_noflip_failed++;
+    }
+
+    return;
+}
+
+void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv,std::string channel)
+{
+    // create truth vertex for matching
+    const xAOD::TruthVertex *tru_matched = nullptr;
+
+    // perform vertex fit
+    ATH_MSG_DEBUG("Performing vertex fit, channel = " << channel);
+    auto fit = m_vertexer->FitVertex(tr1, tr2, pv);
+
+    if(fit) {
+
+        // refit vertex
+        if(RefitVertex(tr1, tr2, *fit)){
+        //if(true){
+
+            // count refit-succeeded vertices
+            n_refit_flip_succeeded++;
+
+            // access position of vertices
+            auto dv_pos = fit->position();
+            auto pv_pos = m_evtc->GetPV(*pvc)->position();
+   
+            // distance in 3d vector
+            auto dist = pv_pos - dv_pos;
+   
+            // position of vertex w.r.t. pv
+            float vtx_perp = dist.perp();
+            float vtx_z = dist.z();
+            float vtx_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
+            float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+            // mass cut
+            float mass_min = 10.;
+
+            if(channel == "mumu") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_mumu_cf_flip->Fill("#mu#mu",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_mumu_cf_flip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("#mu^{+}#mu^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto
+                //m_mumu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_mumu_flip_R->Fill(vtx_perp);
+                    m_mumu_flip_z->Fill(vtx_z);
+                    m_mumu_flip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_mumu_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+            if(channel == "emu") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+
+                if (pass_vertex) m_emu_cf_flip->Fill("e#mu",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_emu_cf_flip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("e^{+/-}#mu^{-/+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto (excl. mu)
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_emu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_emu_flip_R->Fill(vtx_perp);
+                    m_emu_flip_z->Fill(vtx_z);
+                    m_emu_flip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_emu_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+            }
+            if(channel == "ee") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+
+                if (pass_vertex) m_ee_cf_flip->Fill("ee",1);
+
+                // place holder to match with main analysis
+                if (pass_vertex) m_ee_cf_flip->Fill("place holder",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("e^{+}e^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto (excl. mu)
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_ee_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_ee_flip_R->Fill(vtx_perp);
+                    m_ee_flip_z->Fill(vtx_z);
+                    m_ee_flip_M->Fill(dv_mass);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_ee_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+            }
+            if(channel == "idid") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_idid_cf_flip->Fill("xx",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("x^{+}x^{-}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_idid_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_idid_flip_M->Fill(dv_mass);
+                    m_idid_flip_R->Fill(vtx_perp);
+                    m_idid_flip_z->Fill(vtx_z);
+                    m_idid_flip_l->Fill(vtx_l);
+                    m_idid_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+
+                    // fill idid vertex vs track multiplicity
+                    m_idid_flip_n_tracks->Fill(n_trk_sel);
+
+                    // deltaR plot
+                    TLorentzVector tlv_tp0;
+                    TLorentzVector tlv_tp1;
+
+                    // define TLorentzVector of decay particles
+                    tlv_tp0 = tr1.p4();
+                    tlv_tp1 = tr2.p4();
+
+                    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+                    m_idid_flip_deltaR->Fill(deltaR);
+
+                    // fill track parameters wrt SV
+                    const Trk::Perigee* sv_perigee1 = m_trackToVertexTool->perigeeAtVertex(tr1, dv_pos);
+                    const Trk::Perigee* sv_perigee2 = m_trackToVertexTool->perigeeAtVertex(tr2, dv_pos);
+
+                    double tr1_d0_wrtSV        = sv_perigee1->parameters() [Trk::d0];
+                    double tr1_z0_wrtSV        = sv_perigee1->parameters() [Trk::z0];
+                    double tr1_theta_wrtSV     = sv_perigee1->parameters() [Trk::theta];
+                    double tr1_phi_wrtSV       = sv_perigee1->parameters() [Trk::phi];
+                    double tr1_qOverP_wrtSV    = sv_perigee1->parameters() [Trk::qOverP];
+                    double tr1_p_wrtSV         = 1.0 / fabs(tr1_qOverP_wrtSV) / 1000.;
+                    double tr1_pt_wrtSV        = tr1_p_wrtSV * std::sin( tr1_theta_wrtSV );
+                    double tr1_d0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::d0 );
+                    double tr1_z0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::z0 );
+                    double tr1_d0_over_d0sigma_wrtSV   = tr1_d0_wrtSV / tr1_d0sigma_wrtSV;
+                    double tr1_z0_over_z0sigma_wrtSV   = tr1_z0_wrtSV / tr1_z0sigma_wrtSV;
+
+                    double tr2_d0_wrtSV        = sv_perigee2->parameters() [Trk::d0];
+                    double tr2_z0_wrtSV        = sv_perigee2->parameters() [Trk::z0];
+                    double tr2_theta_wrtSV     = sv_perigee2->parameters() [Trk::theta];
+                    double tr2_phi_wrtSV       = sv_perigee2->parameters() [Trk::phi];
+                    double tr2_qOverP_wrtSV    = sv_perigee2->parameters() [Trk::qOverP];
+                    double tr2_p_wrtSV         = 1.0 / fabs(tr2_qOverP_wrtSV) / 1000.;
+                    double tr2_pt_wrtSV        = tr2_p_wrtSV * std::sin( tr2_theta_wrtSV );
+                    double tr2_d0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::d0 );
+                    double tr2_z0sigma_wrtSV   = (*sv_perigee2->covariance())( Trk::z0 );
+                    double tr2_d0_over_d0sigma_wrtSV   = tr2_d0_wrtSV / tr2_d0sigma_wrtSV;
+                    double tr2_z0_over_z0sigma_wrtSV   = tr2_z0_wrtSV / tr2_z0sigma_wrtSV;
+
+                    // fill track parameters wrt SV
+                    m_track_flip_d0_wrtSV->Fill (tr1_d0_wrtSV);
+                    m_track_flip_z0_wrtSV->Fill (tr1_z0_wrtSV);
+                    m_track_flip_phi_wrtSV->Fill(tr1_phi_wrtSV);
+                    m_track_flip_theta_wrtSV->Fill(tr1_theta_wrtSV);
+                    m_track_flip_p_wrtSV->Fill(tr1_p_wrtSV);
+                    m_track_flip_pt_wrtSV->Fill(tr1_pt_wrtSV);
+                    m_track_flip_d0sigma_wrtSV->Fill(tr1_d0sigma_wrtSV);
+                    m_track_flip_z0sigma_wrtSV->Fill(tr1_z0sigma_wrtSV);
+                    m_track_flip_d0_over_d0sigma_wrtSV->Fill(tr1_d0_over_d0sigma_wrtSV);
+                    m_track_flip_z0_over_z0sigma_wrtSV->Fill(tr1_z0_over_z0sigma_wrtSV);
+
+                    m_track_flip_d0_wrtSV->Fill (tr2_d0_wrtSV);
+                    m_track_flip_z0_wrtSV->Fill (tr2_z0_wrtSV);
+                    m_track_flip_phi_wrtSV->Fill(tr2_phi_wrtSV);
+                    m_track_flip_theta_wrtSV->Fill(tr2_theta_wrtSV);
+                    m_track_flip_p_wrtSV->Fill(tr2_p_wrtSV);
+                    m_track_flip_pt_wrtSV->Fill(tr2_pt_wrtSV);
+                    m_track_flip_d0sigma_wrtSV->Fill(tr2_d0sigma_wrtSV);
+                    m_track_flip_z0sigma_wrtSV->Fill(tr2_z0sigma_wrtSV);
+                    m_track_flip_d0_over_d0sigma_wrtSV->Fill(tr2_d0_over_d0sigma_wrtSV);
+                    m_track_flip_z0_over_z0sigma_wrtSV->Fill(tr2_z0_over_z0sigma_wrtSV);
+
+                    // fill track parameters wrt beam pipe
+                    double tr1_p = 1.0 / fabs(tr1.qOverP()) / 1000.;
+                    double tr1_pt = tr1_p * std::sin(tr1.theta());
+                    double tr2_p = 1.0 / fabs(tr2.qOverP()) / 1000.;
+                    double tr2_pt = tr2_p * std::sin(tr2.theta());
+
+                    m_track_flip_d0->Fill(tr1.d0());
+                    m_track_flip_z0->Fill(tr1.z0());
+                    m_track_flip_phi->Fill(tr1.phi());
+                    m_track_flip_theta->Fill(tr1.theta());
+                    m_track_flip_p->Fill(tr1_p);
+                    m_track_flip_pt->Fill(tr1_pt);
+                    m_track_flip_d0sigma->Fill((tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_flip_z0sigma->Fill((tr1).definingParametersCovMatrixVec()[1]);
+                    m_track_flip_d0_over_d0sigma->Fill((tr1).definingParameters()[0] / (tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_flip_z0_over_z0sigma->Fill((tr1).definingParameters()[1] / (tr1).definingParametersCovMatrixVec()[1]);
+
+                    m_track_flip_d0->Fill(tr2.d0());
+                    m_track_flip_z0->Fill(tr2.z0());
+                    m_track_flip_phi->Fill(tr2.phi());
+                    m_track_flip_theta->Fill(tr2.theta());
+                    m_track_flip_p->Fill(tr2_p);
+                    m_track_flip_pt->Fill(tr2_pt);
+                    m_track_flip_d0sigma->Fill((tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_flip_z0sigma->Fill((tr2).definingParametersCovMatrixVec()[1]);
+                    m_track_flip_d0_over_d0sigma->Fill((tr2).definingParameters()[0] / (tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_flip_z0_over_z0sigma->Fill((tr2).definingParameters()[1] / (tr2).definingParametersCovMatrixVec()[1]);
+
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_idid_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+
+            if(channel == "mut") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_mut_cf_flip->Fill("#mux",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("#mu^{+,-}x^{-,+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) return;
+                //m_mut_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_mut_flip_R->Fill(vtx_perp);
+                    m_mut_flip_z->Fill(vtx_z);
+                    m_mut_flip_l->Fill(vtx_l);
+                    m_mut_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+
+                    // mass plot
+                    m_mut_flip_M->Fill(dv_mass);
+
+                    // deltaR plot
+                    TLorentzVector tlv_tp0;
+                    TLorentzVector tlv_tp1;
+
+                    // define TLorentzVector of decay particles
+                    tlv_tp0 = tr1.p4();
+                    tlv_tp1 = tr2.p4();
+
+                    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+                    m_mut_flip_deltaR->Fill(deltaR);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_mut_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+
+            if(channel == "et") {
+
+                // cut flow flag
+                bool pass_vertex = true;
+            
+                if (pass_vertex) m_et_cf_flip->Fill("ex",1);
+
+                // vertex fit quality
+                if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+
+                // minimum distance from pv (from 0 for MC)
+                if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("Disp. > 2 mm", 1);
+
+                // charge requirements
+                if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("e^{+,-}x^{-,+}", 1);
+
+                // disabled module
+                if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("DisabledModule", 1);
+
+                // material veto
+                //if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                //if (pass_vertex) m_et_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+
+                // low mass veto
+                if(dv_mass < mass_min) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("LowMassVeto", 1);
+
+                // cosmic veto (R_CR)
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("R_{CR} > 0.04", 1);
+
+                // vertex distribution fill
+                if (pass_vertex) {
+                    m_et_flip_R->Fill(vtx_perp);
+                    m_et_flip_z->Fill(vtx_z);
+                    m_et_flip_l->Fill(vtx_l);
+                    m_et_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+
+                    // mass plot
+                    m_et_flip_M->Fill(dv_mass);
+
+                    // deltaR plot
+                    TLorentzVector tlv_tp0;
+                    TLorentzVector tlv_tp1;
+
+                    // define TLorentzVector of decay particles
+                    tlv_tp0 = tr1.p4();
+                    tlv_tp1 = tr2.p4();
+
+                    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
+                    m_et_flip_deltaR->Fill(deltaR);
+
+                    // truth match
+                    if (isMC){
+                        tru_matched = getClosestTruthVertex(fit);
+                        if(tru_matched) m_et_cf_flip->Fill("Truth matched", 1);
+                    }
+                }
+    
+            }
+        }
+        else n_refit_flip_failed++;
+    }
+
+    return;
+}
+
+
+// cosmic veto cut
 bool FlipBkgEst::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
@@ -776,25 +1624,7 @@ bool FlipBkgEst::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackPartic
     return PassCosmicVeto;
 }
 
-bool FlipBkgEst::PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
-
-    bool PassCosmicVeto = true;
-    float deltaR_min = 0.5;
-
-    TLorentzVector tlv_tp0;
-    TLorentzVector tlv_tp1;
-
-    // define TLorentzVector of decay particles
-    tlv_tp0 = tr0.p4();
-    tlv_tp1 = tr1.p4();
-
-    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-
-    if (deltaR < deltaR_min) PassCosmicVeto = false;
-
-    return PassCosmicVeto;
-}
-
+// find closest truth vertex for truth matching
 const xAOD::TruthVertex* FlipBkgEst::getClosestTruthVertex(const xAOD::Vertex *rv){
 
     double maxDistance = 0.7;
@@ -827,731 +1657,114 @@ const xAOD::TruthVertex* FlipBkgEst::getClosestTruthVertex(const xAOD::Vertex *r
     else return nullptr;
 }
 
-void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv,std::string channel)
-{
-    // create truth vertex for matching
-    const xAOD::TruthVertex *tru_matched = nullptr;
 
-    // perform vertex fit
-    ATH_MSG_DEBUG("Performing vertex fit, channel = " << channel);
-    auto fit = m_vertexer->FitVertex(tr1, tr2, pv);
-    if(fit) {
+// find vertex type given number of e and m
+std::string FlipBkgEst::FindDecayChannel(int n_mu, int n_elc){
 
-        // retrieve primary vertices
-        const xAOD::VertexContainer* pvc = nullptr;
-        evtStore()->retrieve( pvc, "PrimaryVertices" );
+    // default decay channel
+    std::string channel = "idid";
 
-        float vtx_x = fit->position().x();
-        float vtx_y = fit->position().y();
-        float vtx_z = fit->position().z();
+    // assign channel
+    if (n_mu == 2) channel = "mumu";
+    else if (n_elc == 2) channel = "ee";
+    else if ((n_mu == 1) and (n_elc ==1)) channel = "emu";
+    else if ((n_mu == 1) and (n_elc ==0)) channel = "mut";
+    else if ((n_mu == 0) and (n_elc ==1)) channel = "et";
 
-        float vtx_perp = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y);
-        float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
-
-        // mass cut
-        float mass_min = 3.;
-
-        ATH_MSG_DEBUG("PerfomrFit: Found vertex with perp = " << vtx_perp);
-        ATH_MSG_DEBUG("Found vertex with channel " << channel);
-
-        if(channel == "mumu") {
-        
-            m_mumu_cf_noflip->Fill("#mu#mu",1);
-
-            // place holder to match with main analysis
-            m_mumu_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_mumu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_mumu_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_mumu_cf_noflip->Fill("#mu^{+}#mu^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_mumu_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto
-            m_mumu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_mumu_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_mumu_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_mumu_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_mumu_noflip_R->Fill(vtx_perp);
-            m_mumu_noflip_z->Fill(vtx_z);
-            m_mumu_noflip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_mumu_cf_noflip->Fill("Truth matched", 1);
-            }
-    
-        }
-        if(channel == "emu") {
-            m_emu_cf_noflip->Fill("e#mu",1);
-
-            // place holder to match with main analysis
-            m_emu_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_emu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_emu_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_emu_cf_noflip->Fill("e^{+/-}#mu^{-/+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_emu_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto (only e)
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_emu_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_emu_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_emu_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_emu_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_emu_noflip_R->Fill(vtx_perp);
-            m_emu_noflip_z->Fill(vtx_z);
-            m_emu_noflip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_emu_cf_noflip->Fill("Truth matched", 1);
-            }
-        }
-        if(channel == "ee") {
-            m_ee_cf_noflip->Fill("ee",1);
-
-            // place holder to match with main analysis
-            m_ee_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_ee_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_ee_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_ee_cf_noflip->Fill("e^{+}e^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_ee_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto (only e)
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_ee_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_ee_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_ee_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_ee_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_ee_noflip_R->Fill(vtx_perp);
-            m_ee_noflip_z->Fill(vtx_z);
-            m_ee_noflip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_ee_cf_noflip->Fill("Truth matched", 1);
-            }
-        }
-        if(channel == "idid") {
-        
-            m_idid_cf_noflip->Fill("Trk-Trk",1);
-
-            // place holder to match with main analysis
-            m_idid_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_idid_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_idid_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_idid_cf_noflip->Fill("Trk^{+}Trk^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_idid_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_idid_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_idid_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_idid_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_idid_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_idid_noflip_R->Fill(vtx_perp);
-            m_idid_noflip_z->Fill(vtx_z);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_idid_cf_noflip->Fill("Truth matched", 1);
-            }
-    
-        }
-
-        if(channel == "mut") {
-        
-            m_mut_cf_noflip->Fill("#mu-Trk",1);
-
-            // place holder to match with main analysis
-            m_mut_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_mut_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_mut_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_mut_cf_noflip->Fill("#mu^{+,-}Trk^{-,+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_mut_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_mut_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_mut_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_mut_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_mut_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_mut_noflip_R->Fill(vtx_perp);
-            m_mut_noflip_z->Fill(vtx_z);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_mut_cf_noflip->Fill("Truth matched", 1);
-            }
-    
-        }
-
-        if(channel == "et") {
-        
-            m_et_cf_noflip->Fill("e-Trk",1);
-
-            // place holder to match with main analysis
-            m_et_cf_noflip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_et_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_et_cf_noflip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_et_cf_noflip->Fill("e^{+,-}Trk^{-,+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_et_cf_noflip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_et_cf_noflip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_et_cf_noflip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_et_cf_noflip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_et_cf_noflip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_et_noflip_R->Fill(vtx_perp);
-            m_et_noflip_z->Fill(vtx_z);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_et_cf_noflip->Fill("Truth matched", 1);
-            }
-    
-        }
-    }
+    return channel;
 }
 
-void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv,std::string channel)
-{
-    // create truth vertex for matching
-    const xAOD::TruthVertex *tru_matched = nullptr;
-
-    // perform vertex fit
-    ATH_MSG_DEBUG("Performing vertex fit, channel = " << channel);
-    auto fit = m_vertexer->FitVertex(tr1, tr2, pv);
-    if(fit) {
-
-        // retrieve primary vertices
-        const xAOD::VertexContainer* pvc = nullptr;
-        evtStore()->retrieve( pvc, "PrimaryVertices" );
-
-        float vtx_x = fit->position().x();
-        float vtx_y = fit->position().y();
-        float vtx_z = fit->position().z();
-
-        float vtx_perp = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y);
-        float vtx_l = std::sqrt(vtx_x*vtx_x + vtx_y*vtx_y + vtx_z*vtx_z);
-        float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
-
-        // mass cut
-        float mass_min = 3.;
-
-        ATH_MSG_DEBUG("PerfomrFit: Found vertex with perp = " << vtx_perp);
-
-
-        ATH_MSG_DEBUG("Found vertex with channel " << channel);
-        if(channel == "mumu") {
-        
-            m_mumu_cf_flip->Fill("#mu#mu",1);
-
-            // place holder to match with main analysis
-            m_mumu_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_mumu_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_mumu_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_mumu_cf_flip->Fill("#mu^{+}#mu^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_mumu_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto
-            m_mumu_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            if(dv_mass < mass_min) return;
-            m_mumu_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_mumu_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_mumu_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_mumu_flip_R->Fill(vtx_perp);
-            m_mumu_flip_z->Fill(vtx_z);
-            m_mumu_flip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_mumu_cf_flip->Fill("Truth matched", 1);
-            }
-    
-        }
-        if(channel == "emu") {
-            m_emu_cf_flip->Fill("e#mu",1);
-
-            // place holder to match with main analysis
-            m_emu_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_emu_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_emu_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_emu_cf_flip->Fill("e^{+/-}#mu^{-/+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_emu_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto (only e)
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_emu_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            if(dv_mass < mass_min) return;
-            m_emu_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_emu_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_emu_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_emu_flip_R->Fill(vtx_perp);
-            m_emu_flip_z->Fill(vtx_z);
-            m_emu_flip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_emu_cf_flip->Fill("Truth matched", 1);
-            }
-        }
-        if(channel == "ee") {
-            m_ee_cf_flip->Fill("ee",1);
-
-            // place holder to match with main analysis
-            m_ee_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_ee_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_ee_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_ee_cf_flip->Fill("e^{+}e^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_ee_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto (only e)
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_ee_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_ee_cf_flip->Fill("LowMassVeto", 1);
-            if(dv_mass < mass_min) return;
-            m_ee_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_ee_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_ee_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            // vertex distribution fill
-            m_ee_flip_R->Fill(vtx_perp);
-            m_ee_flip_z->Fill(vtx_z);
-            m_ee_flip_M->Fill(dv_mass);
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_ee_cf_flip->Fill("Truth matched", 1);
-            }
-        }
-        if(channel == "idid") {
-        
-            m_idid_cf_flip->Fill("Trk-Trk",1);
-
-            // place holder to match with main analysis
-            m_idid_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_idid_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_idid_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_idid_cf_flip->Fill("Trk^{+}Trk^{-}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_idid_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_idid_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_idid_cf_flip->Fill("LowMassVeto", 1);
-            if(dv_mass < mass_min) return;
-            m_idid_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_idid_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_idid_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            //==========================================
-            // vertex distribution fill
-            m_idid_flip_R->Fill(vtx_perp);
-            m_idid_flip_z->Fill(vtx_z);
-            m_idid_flip_l->Fill(vtx_l);
-            m_idid_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
-
-            // mass plot
-            //float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
-            m_idid_flip_M->Fill(dv_mass);
-
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tr1.p4();
-            tlv_tp1 = tr2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-            m_idid_flip_deltaR->Fill(deltaR);
-            //==========================================
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_idid_cf_flip->Fill("Truth matched", 1);
-            }
-    
-        }
-
-        if(channel == "mut") {
-        
-            m_mut_cf_flip->Fill("#mu-Trk",1);
-
-            // place holder to match with main analysis
-            m_mut_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_mut_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_mut_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_mut_cf_flip->Fill("#mu^{+,-}Trk^{-,+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_mut_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_mut_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_mut_cf_flip->Fill("LowMassVeto", 1);
-            if(dv_mass < mass_min) return;
-            m_mut_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_mut_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_mut_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            //==========================================
-            // vertex distribution fill
-            //==========================================
-            m_mut_flip_R->Fill(vtx_perp);
-            m_mut_flip_z->Fill(vtx_z);
-            m_mut_flip_l->Fill(vtx_l);
-            m_mut_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
-
-            // mass plot
-            m_mut_flip_M->Fill(dv_mass);
-
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tr1.p4();
-            tlv_tp1 = tr2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-            m_mut_flip_deltaR->Fill(deltaR);
-            //==========================================
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_mut_cf_flip->Fill("Truth matched", 1);
-            }
-    
-        }
-
-        if(channel == "et") {
-        
-            m_et_cf_flip->Fill("e-Trk",1);
-
-            // place holder to match with main analysis
-            m_et_cf_flip->Fill("place holder",1);
-
-            // vertex fit quality
-            if(!m_dvc->PassChisqCut(*fit)) return;
-            m_et_cf_flip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
-
-            // minimum distance from pv (from 0 for MC)
-            if(!m_dvc->PassDistCut(*fit, *pvc)) return;
-            m_et_cf_flip->Fill("Disp. > 2 mm", 1);
-
-            // charge requirements
-            if(!m_dvc->PassChargeRequirement(*fit)) return;
-            m_et_cf_flip->Fill("e^{+,-}Trk^{-,+}", 1);
-
-            // disabled module
-            if(!m_dvc->PassDisabledModuleVeto(*fit)) return;
-            m_et_cf_flip->Fill("DisabledModule", 1);
-
-            // material veto
-            if(!m_dvc->PassMaterialVeto(*fit)) return;
-            m_et_cf_flip->Fill("MaterialVeto (Only e)", 1);
-
-            // low mass veto
-            //if(!m_dvc->PassLowMassVeto(*fit)) return;
-            //m_et_cf_flip->Fill("LowMassVeto", 1);
-            if(dv_mass < mass_min) return;
-            m_et_cf_flip->Fill("LowMassVeto", 1);
-
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tr1, tr2)) return;
-            m_et_cf_flip->Fill("R_{CR} > 0.04", 1);
-
-            // cosmic veto (deltaR)
-            if(!PassCosmicVeto_DeltaR(tr1, tr2)) return;
-            m_et_cf_flip->Fill("#DeltaR > 0.5", 1);
-
-            //==========================================
-            // vertex distribution fill
-            //==========================================
-            m_et_flip_R->Fill(vtx_perp);
-            m_et_flip_z->Fill(vtx_z);
-            m_et_flip_l->Fill(vtx_l);
-            m_et_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
-
-            // mass plot
-            //float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
-            m_et_flip_M->Fill(dv_mass);
-
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tr1.p4();
-            tlv_tp1 = tr2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
-            m_et_flip_deltaR->Fill(deltaR);
-            //==========================================
-
-            // truth match
-            if (isMC){
-                tru_matched = getClosestTruthVertex(fit);
-                if(tru_matched) m_et_cf_flip->Fill("Truth matched", 1);
-            }
-    
-        }
+void FlipBkgEst::FillTrackPair(std::string channel){
+
+    // fill track pair histogram
+    if (channel == "mumu") {
+        // count number of pairs
+        m_mumu_cf_noflip->Fill("#mu#mu pair",1);
+        m_mumu_cf_flip->Fill("#mu#mu pair",1);
     }
+    else if (channel =="ee") {
+        // count number of pairs
+        m_ee_cf_noflip->Fill("ee pair",1);
+        m_ee_cf_flip->Fill("ee pair",1);
+    }
+    else if (channel =="emu") {
+        // count number of pairs
+        m_emu_cf_noflip->Fill("e#mu pair",1);
+        m_emu_cf_flip->Fill("e#mu pair",1);
+    }
+    else if (channel =="mut") {
+        // count number of pairs
+        m_mut_cf_noflip->Fill("#mux pair",1);
+        m_mut_cf_flip->Fill("#mux pair",1);
+    }
+    else if (channel == "et") {
+        // count number of pairs
+        m_et_cf_noflip->Fill("ex pair",1);
+        m_et_cf_flip->Fill("ex pair",1);
+    }
+    else {
+        // count number of pairs
+        m_idid_cf_noflip->Fill("xx pair",1);
+        m_idid_cf_flip->Fill("xx pair",1);
+    }
+
+}
+
+bool FlipBkgEst::RefitVertex(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2,xAOD::Vertex& vrt){
+
+
+    // vectors of seed tracks
+    std::vector<const xAOD::TrackParticle*> vectorTrk = {&tr1, &tr2};
+
+    // dummy vec
+    std::vector<const xAOD::NeutralParticle*> dummyNeutralList;
+
+    // set approximate vertex using current position
+    m_fitsvc->setApproximateVertex(vrt.x(), vrt.y(), vrt.z());
+
+    // set default
+    m_fitsvc->setDefault();
+
+    // get fast approximation
+    Amg::Vector3D IniVertex;
+    StatusCode sc_fast = m_fitsvc->VKalVrtFitFast(vectorTrk, IniVertex);
+    if(sc_fast.isFailure()) return false;
+
+    // vector to represent vertex position before refit
+    Amg::Vector3D OrigVertex(vrt.x(), vrt.y(), vrt.z());
+
+    // core part of refitting
+    if(  (IniVertex.x()-OrigVertex.x())*(IniVertex.x()-OrigVertex.x()) +
+         (IniVertex.y()-OrigVertex.y())*(IniVertex.y()-OrigVertex.y()) +
+         (IniVertex.z()-OrigVertex.z())*(IniVertex.z()-OrigVertex.z())  > 100. ) {
+        // set original position as approximation 
+        m_fitsvc->setApproximateVertex( OrigVertex.x(), OrigVertex.y(), OrigVertex.z() );
+    }
+    else {
+        // set new position as approximation 
+        m_fitsvc->setApproximateVertex( IniVertex.x(), IniVertex.y(), IniVertex.z() );
+    }
+
+    ATH_MSG_DEBUG("==============================================");
+    ATH_MSG_DEBUG("OrigVertex: x = " << vrt.x() << ", y = " << vrt.y() << ", z = " << vrt.z());
+    ATH_MSG_DEBUG("IniVertex: x = " << IniVertex.x() << ", y = " << IniVertex.y() << ", z = " << IniVertex.z());
+
+    // perform fit of displaced vertex
+    StatusCode sc = m_fitsvc->VKalVrtFit(vectorTrk, dummyNeutralList, m_dv_fit, m_Momentum, m_Charge, m_ErrorMatrix, m_Chi2PerTrk, m_TrkAtVrt, m_Chi2);
+     
+    if(sc.isFailure()){
+        ATH_MSG_DEBUG("DEBUG: >>> RefitVertex: SC in RefitVertex returned failure ");
+    }
+
+    // clear fit result
+    m_dv_fit = Amg::Vector3D(0, 0, 0);
+    m_Momentum = TLorentzVector();
+    m_Charge = 0;
+    m_ErrorMatrix.clear();
+    m_Chi2PerTrk.clear();
+    m_TrkAtVrt.clear();
+    m_Chi2 = 0;
+
+
+    return sc;
 }

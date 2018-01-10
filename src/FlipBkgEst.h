@@ -16,6 +16,9 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/VertexContainer.h"
 
+// Track to vertex 
+#include "ITrackToVertex/ITrackToVertex.h"
+
 // DV
 #include "DDLBase/IEventCuts.h"
 #include "DDLBase/IDVCuts.h"
@@ -37,6 +40,9 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 
+// Athena
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+
 
 class FlipBkgEst: public ::AthAnalysisAlgorithm { 
     public: 
@@ -49,13 +55,24 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
+        // Cosmic veto cut
         virtual bool PassCosmicVeto_R_CR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
-        virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        //virtual bool PassCosmicVeto_DeltaR(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
+        //virtual std::string ApplyLeptonRequirement(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2);
 
+        // Perform vertexing and fill final histograms
         virtual void PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv, std::string channel);
         virtual void PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, const Amg::Vector3D& pv, std::string channel);
 
+        // Find vertex type given number of e and m
+        virtual std::string FindDecayChannel(int n_mu, int n_elc);
+
+        // Fill track pairs
+        virtual void FillTrackPair(std::string channel);
+
         virtual const xAOD::TruthVertex* getClosestTruthVertex(const xAOD::Vertex *dv);
+
+        virtual bool RefitVertex(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2,xAOD::Vertex& vrt);
         bool isMC;
     
     private: 
@@ -73,6 +90,8 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDispVertexer> m_vertexer; //!
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
         ToolHandle<DDL::ITrigMatch> m_trig; //!
+        ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
+        ToolHandle<Trk::ITrkVKalVrtFitter> m_fitsvc;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
@@ -89,27 +108,21 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         TH1D* m_n_elc_sel; //!
         TH1D* m_n_id_sel; //!
 
-        TH1D* m_mumu_cf_input; //!
         TH1D* m_mumu_cf_noflip; //!
         TH1D* m_mumu_cf_flip; //!
 
-        TH1D* m_ee_cf_input; //!
         TH1D* m_ee_cf_noflip; //!
         TH1D* m_ee_cf_flip; //!
 
-        TH1D* m_emu_cf_input; //!
         TH1D* m_emu_cf_noflip; //!
         TH1D* m_emu_cf_flip; //!
 
-        TH1D* m_idid_cf_input; //!
         TH1D* m_idid_cf_noflip; //!
         TH1D* m_idid_cf_flip; //!
 
-        TH1D* m_mut_cf_input; //!
         TH1D* m_mut_cf_noflip; //!
         TH1D* m_mut_cf_flip; //!
 
-        TH1D* m_et_cf_input; //!
         TH1D* m_et_cf_noflip; //!
         TH1D* m_et_cf_flip; //!
 
@@ -137,10 +150,15 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
 
         TH1F* m_idid_noflip_R; //!
         TH1F* m_idid_noflip_z; //!
+        TH1F* m_idid_noflip_M; //!
+        TH1F* m_idid_noflip_l; //!
+        TH1F* m_idid_noflip_n_tracks; //!
+
         TH1F* m_idid_flip_R; //!
         TH1F* m_idid_flip_z; //!
         TH1F* m_idid_flip_M; //!
         TH1F* m_idid_flip_l; //!
+        TH1F* m_idid_flip_n_tracks; //!
         TH1F* m_idid_flip_chi2_ndof; //!
         TH1F* m_idid_flip_deltaR; //!
 
@@ -162,10 +180,82 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         TH1F* m_et_flip_chi2_ndof; //!
         TH1F* m_et_flip_deltaR; //!
 
+        // Track parameters
+        TH1F* m_track_noflip_p; //!
+        TH1F* m_track_noflip_pt; //!
+        TH1F* m_track_noflip_z0; //!
+        TH1F* m_track_noflip_d0; //!
+        TH1F* m_track_noflip_phi; //!
+        TH1F* m_track_noflip_theta; //!
+        TH1F* m_track_noflip_z0sigma; //!
+        TH1F* m_track_noflip_d0sigma; //!
+        TH1F* m_track_noflip_d0_over_d0sigma; //!
+        TH1F* m_track_noflip_z0_over_z0sigma; //!
 
-        // counting pairs
-        int n_tt_pair = 0;
+        TH1F* m_track_noflip_p_wrtSV; //!
+        TH1F* m_track_noflip_pt_wrtSV; //!
+        TH1F* m_track_noflip_z0_wrtSV; //!
+        TH1F* m_track_noflip_d0_wrtSV; //!
+        TH1F* m_track_noflip_phi_wrtSV; //!
+        TH1F* m_track_noflip_theta_wrtSV; //!
+        TH1F* m_track_noflip_z0sigma_wrtSV; //!
+        TH1F* m_track_noflip_d0sigma_wrtSV; //!
+        TH1F* m_track_noflip_d0_over_d0sigma_wrtSV; //!
+        TH1F* m_track_noflip_z0_over_z0sigma_wrtSV; //!
+
+        TH1F* m_track_flip_p; //!
+        TH1F* m_track_flip_pt; //!
+        TH1F* m_track_flip_z0; //!
+        TH1F* m_track_flip_d0; //!
+        TH1F* m_track_flip_phi; //!
+        TH1F* m_track_flip_theta; //!
+        TH1F* m_track_flip_z0sigma; //!
+        TH1F* m_track_flip_d0sigma; //!
+        TH1F* m_track_flip_d0_over_d0sigma; //!
+        TH1F* m_track_flip_z0_over_z0sigma; //!
+
+        TH1F* m_track_flip_p_wrtSV; //!
+        TH1F* m_track_flip_pt_wrtSV; //!
+        TH1F* m_track_flip_z0_wrtSV; //!
+        TH1F* m_track_flip_d0_wrtSV; //!
+        TH1F* m_track_flip_phi_wrtSV; //!
+        TH1F* m_track_flip_theta_wrtSV; //!
+        TH1F* m_track_flip_d0sigma_wrtSV; //!
+        TH1F* m_track_flip_z0sigma_wrtSV; //!
+        TH1F* m_track_flip_d0_over_d0sigma_wrtSV; //!
+        TH1F* m_track_flip_z0_over_z0sigma_wrtSV; //!
+
+
+        // counting selected tracks
         int n_trk_sel = 0;
+        int n_mu_sel = 0;
+        int n_el_sel = 0;
+
+        // count leptons with nullptr
+        int n_mu_null = 0;
+        int n_mu_valid = 0;
+        int n_el_null = 0;
+        int n_el_valid = 0;
+        int n_trk_noperigee = 0;
+
+        // containers
+        const xAOD::VertexContainer* pvc = nullptr;
+
+        // fit results
+        Amg::Vector3D m_dv_fit;
+        TLorentzVector m_Momentum;
+        long int m_Charge;
+        std::vector<double> m_ErrorMatrix;
+        std::vector<double> m_Chi2PerTrk;
+        std::vector<std::vector<double>> m_TrkAtVrt;
+        double m_Chi2;
+        std::vector<const Trk::Perigee*> m_perigees;
+
+        // counting vertex failed on refitting
+        int n_refit_noflip_failed = 0;
+        int n_refit_noflip_succeeded = 0;
+        int n_refit_flip_failed = 0;
+        int n_refit_flip_succeeded = 0;
 }; 
 
 #endif //> !DISPDILEPATHENA_FLIPBKGEST_H
