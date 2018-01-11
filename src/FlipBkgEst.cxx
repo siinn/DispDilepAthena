@@ -399,9 +399,11 @@ StatusCode FlipBkgEst::execute() {
     const xAOD::ElectronContainer* elc = nullptr;
     CHECK( evtStore()->retrieve( elc, "Electrons" ));
 
+    //const xAOD::TrackParticleContainer* vsc = nullptr;
+    //CHECK( evtStore()->retrieve( vsc, "VrtSecInclusive_SelectedTrackParticles" ));
+
     const xAOD::TrackParticleContainer* idc = nullptr;
-    //CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
-    CHECK( evtStore()->retrieve( idc, "VrtSecInclusive_SelectedTrackParticles" ));
+    CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
 
     // make copies of leptons
     auto muc_copy = xAOD::shallowCopyContainer(*muc);
@@ -425,13 +427,13 @@ StatusCode FlipBkgEst::execute() {
     auto pv_pos = m_evtc->GetPV(*pvc)->position();
 
     // create container for good tracks
-    auto el_sel     = new xAOD::TrackParticleContainer();
-    auto el_sel_aux = new xAOD::TrackParticleAuxContainer();
-    el_sel->setStore(el_sel_aux);
+    //auto el_sel     = new xAOD::TrackParticleContainer();
+    //auto el_sel_aux = new xAOD::TrackParticleAuxContainer();
+    //el_sel->setStore(el_sel_aux);
 
-    auto mu_sel     = new xAOD::TrackParticleContainer();
-    auto mu_sel_aux = new xAOD::TrackParticleAuxContainer();
-    mu_sel->setStore(mu_sel_aux);
+    //auto mu_sel     = new xAOD::TrackParticleContainer();
+    //auto mu_sel_aux = new xAOD::TrackParticleAuxContainer();
+    //mu_sel->setStore(mu_sel_aux);
 
     auto id_sel     = new xAOD::TrackParticleContainer();
     auto id_sel_aux = new xAOD::TrackParticleAuxContainer();
@@ -445,9 +447,11 @@ StatusCode FlipBkgEst::execute() {
     int n_mu_sel = 0;
     int n_el_sel = 0;
 
+
     //-----------------------------------
     // track selection and deep copy
     //-----------------------------------
+
 
     for(auto mu: *muc_copy.first) {
 
@@ -467,13 +471,14 @@ StatusCode FlipBkgEst::execute() {
 
         if(!m_vertexer->GoodTrack(*mu_tr)) continue;
 
-        // copy ID track
-        xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
-        mu_sel->push_back(tr_ptr);
-        xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
+        //// copy ID track
+        //xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
+        //mu_sel->push_back(tr_ptr);
+        //xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
 
         // mark ID track as muon
         mu_tr->auxdecor<int>("muon") = 1;
+        ATH_MSG_DEBUG("DEBUG: Found muon, ptr = " << mu_tr);
 
         // count selected muon
         n_mu_sel++;
@@ -503,13 +508,14 @@ StatusCode FlipBkgEst::execute() {
 
         if(!m_vertexer->GoodTrack(*el_tr)) continue;
 
-        // copy ID track
-        xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
-        el_sel->push_back(tr_ptr);
-        xAOD::safeDeepCopy(*el_tr, *tr_ptr);
+        //// copy ID track
+        //xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
+        //el_sel->push_back(tr_ptr);
+        //xAOD::safeDeepCopy(*el_tr, *tr_ptr);
 
         // mark ID track as electron
         el_tr->auxdecor<int>("electron") = 1;
+        ATH_MSG_DEBUG("DEBUG: Found electron, ptr = " << el_tr);
 
         // count selected electron
         n_el_sel++;
@@ -535,8 +541,8 @@ StatusCode FlipBkgEst::execute() {
         id_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*id_tr, *tr_ptr);
 
-        // decorate track with p4
-        m_acc_p4(*tr_ptr) = id_tr->p4();
+        //// decorate track with p4
+        //m_acc_p4(*tr_ptr) = id_tr->p4();
 
         // decorate track with flipping status
         tr_ptr->auxdecor<std::string>("Flip") = "new";
@@ -548,8 +554,14 @@ StatusCode FlipBkgEst::execute() {
         auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*id_tr));
         if (orig_tr == nullptr) orig_tr = id_tr;
 
+        ATH_MSG_DEBUG("DEBUG: current orig_tr ptr = " << orig_tr);
+        ATH_MSG_DEBUG("DEBUG: current id_tr ptr = " << orig_tr);
+
         // check if this ID track is a lepton
-        if((orig_tr)->auxdecor<int>("electron") or (orig_tr)->auxdecor<int>("muon")) isLepton = true;
+        if((orig_tr)->auxdecor<int>("electron") or (orig_tr)->auxdecor<int>("muon")) {
+            isLepton = true;
+            ATH_MSG_DEBUG("DEBUG: found electron or muon from orig_tr");
+        }
 
         // count non-leptonic selected track
         if (!isLepton) {
@@ -565,7 +577,7 @@ StatusCode FlipBkgEst::execute() {
 
     // Skip the event if the number of selected tracks is more than m_SelTrkMaxCutoff
     // required in VrtSecInclusive
-    if ((mu_sel->size() + el_sel->size() + id_sel->size()) > 300) return StatusCode::SUCCESS;
+    if ((n_mu_sel + n_el_sel + id_sel->size()) > 300) return StatusCode::SUCCESS;
 
     // create containers for displaced vertices
     auto dv     = new xAOD::VertexContainer();
@@ -601,6 +613,10 @@ StatusCode FlipBkgEst::execute() {
                 if((orig_tr1)->auxdecor<int>("muon")) n_mu++;
                 if((orig_tr2)->auxdecor<int>("muon")) n_mu++;
 
+                ATH_MSG_DEBUG("DEBUG: New pair ==========================");
+                ATH_MSG_DEBUG("DEBUG: \tn_elc = " << n_elc);
+                ATH_MSG_DEBUG("DEBUG: \tn_mu = " << n_mu);
+
                 // find vertex type
                 std::string channel = FindDecayChannel(n_mu, n_elc);
 
@@ -610,6 +626,9 @@ StatusCode FlipBkgEst::execute() {
                 // find track flip status. possible values: new, orig, flip 
                 std::string fs1 = (*id1_itr)->auxdecor<std::string>("Flip");
                 std::string fs2 = (*id2_itr)->auxdecor<std::string>("Flip");
+                
+                ATH_MSG_DEBUG("DEBUG: is this track 1 flipped already ? = " << (*id1_itr)->auxdecor<std::string>("Flip"));
+                ATH_MSG_DEBUG("DEBUG: is this track 2 flipped already ? = " << (*id2_itr)->auxdecor<std::string>("Flip"));
 
                 // flip track 1, leave track 2 unflipped
                 if(((fs1=="new") or (fs1=="flip")) and ((fs2=="new") or (fs2=="orig"))){
@@ -677,7 +696,7 @@ StatusCode FlipBkgEst::execute() {
                     (**id2_itr).setDefiningParameters(dp[0], dp[1], dp[2], dp[3], dp[4]);
                 }
                 else {
-                    ATH_MSG_INFO("DEBUG: non-physical pair. removed. tr1 = " << (*id1_itr) << ", tr1 status = " << fs1 << ", tr2 = " << (*id2_itr) << ", tr2 status = " << fs2);
+                    ATH_MSG_DEBUG("DEBUG: non-physical pair. removed. tr1 = " << (*id1_itr) << ", tr1 status = " << fs1 << ", tr2 = " << (*id2_itr) << ", tr2 status = " << fs2);
 
                 }
             }
@@ -691,10 +710,10 @@ StatusCode FlipBkgEst::execute() {
     delete elc_copy.second;
     delete muc_copy.first;
     delete muc_copy.second;
-    delete el_sel;
-    delete el_sel_aux;
-    delete mu_sel;
-    delete mu_sel_aux;
+    //delete el_sel;
+    //delete el_sel_aux;
+    //delete mu_sel;
+    //delete mu_sel_aux;
 
     return StatusCode::SUCCESS;
 }
