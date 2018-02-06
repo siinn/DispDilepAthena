@@ -80,7 +80,6 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IEventCuts> m_evtc; //!
         ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
         ToolHandle<DDL::IDVCuts> m_dvc;
-        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
         ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
@@ -90,6 +89,7 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDispVertexer> m_vertexer; //!
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
         ToolHandle<DDL::ITrigMatch> m_trig; //!
+        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
         ToolHandle<Trk::ITrkVKalVrtFitter> m_fitsvc;
 
@@ -259,3 +259,4 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
 }; 
 
 #endif //> !DISPDILEPATHENA_FLIPBKGEST_H
+

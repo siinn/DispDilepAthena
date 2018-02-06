@@ -55,6 +55,12 @@ class DVUtils : public AthAlgTool, virtual public IDVUtils {
         const xAOD::TruthVertex* IsSignalDV(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         const xAOD::TruthVertex* IsSignalDV_loose(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel, xAOD::Vertex& dv);
 
+        // find invariant mass of two track
+        float TrackMass (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2);
+
+        // find delta R between two track
+        float getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2);
+
         // reco match using id track barcode
         bool IsReconstructedAsMuon(const xAOD::TruthParticle* tp);
         bool IsReconstructedAsElectron(const xAOD::TruthParticle* tp);

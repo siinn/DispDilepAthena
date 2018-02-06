@@ -3,6 +3,7 @@
 
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/ITHistSvc.h"
+#include "GaudiKernel/IJobOptionsSvc.h"
 #include "TH1F.h"
 
 // xAOD
@@ -15,9 +16,11 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthVertexContainer.h"
+#include "AthAnalysisBaseComps/AthAnalysisHelper.h"
 
 // tools
 #include "PathResolver/PathResolver.h"
+#include "ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h"
 
 // for M_PI
 #include "cmath"
@@ -30,7 +33,6 @@ AthAnalysisAlgorithm( name, pSvcLocator ),
 m_dilepdvc("DDL::DiLepDVCuts/DiLepDVCuts"),
 m_evtc("DDL::EventCuts/DiLepEventCuts"),
 m_dvc("DDL::DVCuts/DiLepBaseCuts"),
-m_cos("DDL::DiLepCosmics/DiLepCosmics"),
 m_dvutils("DVUtils"),
 m_leptool("LeptonSelectionTools"),
 m_costool("CosmicTools"),
@@ -40,21 +42,24 @@ m_tmt("Trig::MatchingTool/TrigMatchingTool"),
 m_or("DDL::OverlapRemoval/OverlapRemoval"),
 m_accMu("DDL_Muons"),
 m_accEl("DDL_Electrons"),
+m_cos("DDL::DiLepCosmics/DiLepCosmics"),
+m_phmatch("DDL::PhotonMatch/PhotonMatch"),
 m_trackToVertexTool("Reco::TrackToVertex"),
 m_accMass("mass")
 {
     // initialize tools
-    declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("DVUtils", m_dvutils);
     declareProperty("LeptonSelectionTool", m_leptool);
     declareProperty("CosmicTool", m_costool);
-    declareProperty("DiLepEventCuts", m_evtc);
-    declareProperty("DiLepBaseCuts", m_dvc);
     declareProperty("GRLTool",  m_grlTool, "The private GoodRunsListSelectionTool" );
     declareProperty("TrigDecisionTool", m_tdt);
     declareProperty("TrigMatchingTool", m_tmt);
-    declareProperty("DiLepCosmics", m_cos);
     declareProperty("OverlapRemoval", m_or);
+    declareProperty("DiLepCosmics", m_cos);
+    declareProperty("DiLepEventCuts", m_evtc);
+    declareProperty("DiLepBaseCuts", m_dvc);
+    declareProperty("DiLepDVCuts", m_dilepdvc);
+    declareProperty("PhotonMatch", m_phmatch);
     declareProperty ("TrackToVertexTool", m_trackToVertexTool);
 
 
@@ -70,7 +75,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // event cut flow
-    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 4,0,4);
+    m_event_cutflow = new TH1D( "m_event_cutflow", "Event cutflow", 5,0,5);
     CHECK( histSvc->regHist("/DV/event_cutflow", m_event_cutflow) );
 
     //--------------------------------------------------------
@@ -79,7 +84,7 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
     m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 9,0,9);
-    m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 1000,0,1000 );
+    m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 2000,0,2000 );
     m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",1000,-1000.,1000.);
@@ -417,10 +422,60 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     // flag to check if data or MC
     bool isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
+    // retrieve lepton container
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ));
+
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
+    const xAOD::PhotonContainer* phc = nullptr;
+    CHECK(evtStore()->retrieve(phc, "Photons"));
+
+    // retrieve primary vertices
+    const xAOD::VertexContainer* pvc = nullptr;
+    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+
     //bool trig_passed = true;
     bool trig_passed = false;
 
-    m_event_cutflow->Fill("AllEvents", 1);
+    // make copies of leptons
+    auto muc_copy = xAOD::shallowCopyContainer(*muc);
+    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
+
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
+
+    // apply overlap removal
+    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
+    // perform matching of photons to electrons
+    m_phmatch->MatchPhotons(*phc, *elc_copy.first);
+
+    // retrieve secondary vertices
+    const xAOD::VertexContainer* dvc = nullptr;
+    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
+    n_vrtsec_all = n_vrtsec_all + dvc->size();
+
+    // make a copy of vertex containers
+    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
+
+    // count all event before looop
+    n_event_all++;
+    n_dvc_copy = n_dvc_copy + (*dvc_copy.first).size();
+
+
+    //---------------------------------------
+    // Event cut flow
+    //---------------------------------------
+
+    if(isMC){
+        m_event_cutflow->Fill("AllEvents",1);
+        //m_event_cutflow->SetBinContent(1, 20000);
+    }
+
+    // all events already passed RPVLL filter
+    m_event_cutflow->Fill("RPVLLFilter", 1);
 
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
@@ -439,44 +494,28 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if(!trig_passed) return StatusCode::SUCCESS;
     m_event_cutflow->Fill("Trig", 1);
 
-    // retrieve lepton container
-    const xAOD::MuonContainer* muc = nullptr;
-    CHECK( evtStore()->retrieve( muc, "Muons" ));
-
-    const xAOD::ElectronContainer* elc = nullptr;
-    CHECK( evtStore()->retrieve( elc, "Electrons" ));
-
-    const xAOD::TrackParticleContainer* idc = nullptr;
-    CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
-
-    // retrieve secondary vertices
-    const xAOD::VertexContainer* dvc = nullptr;
-    CHECK( evtStore()->retrieve( dvc, "VrtSecInclusive_SecondaryVertices" ));
-    n_vrtsec_all = n_vrtsec_all + dvc->size();
-
-    // make copies of leptons
-    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-
-    auto elc_copy = xAOD::shallowCopyContainer(*elc);
-    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
-
-    // apply overlap removal
-    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
-
-    // retrieve primary vertices
-    const xAOD::VertexContainer* pvc = nullptr;
-    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+    // cosmic veto
+    if(!m_cos->PassCosmicEventVeto(*elc, *muc)) return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("CosmicVeto", 1);
 
     // get primary vertex
     auto pv = m_evtc->GetPV(*pvc);
 
-    // make a copy of vertex containers
-    auto dvc_copy = xAOD::shallowCopyContainer(*dvc);
+    // PV position < 200 mm
+    float pv_z_max = 200.;
 
-    // count all event before looop
-    n_event_all++;
-    n_dvc_copy = n_dvc_copy + (*dvc_copy.first).size();
+    // apply primary vertex position cut
+    if (pv) {
+
+        // get primary vertex position
+        auto pv_pos = pv->position();
+
+        // z_pv cut
+        if(pv_pos.z() > pv_z_max) return StatusCode::SUCCESS;
+    }
+    else return StatusCode::SUCCESS;
+    m_event_cutflow->Fill("z_{PV} < 200 mm", 1);
+
 
     //------------------------------
     // dv cut flow
@@ -485,6 +524,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         // mass cut
         float mass_min = 10.;
+        //float track_mass_min = 6.;
+        float dv_R_max = 300;
+        float dv_z_max = 300;
+        auto dv_pos = (*dv).position();
 
         // counting all dv
         n_dv_all++;
@@ -499,18 +542,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         auto dv_muc = m_accMu(*dv);
         auto dv_elc = m_accEl(*dv);
 
-        // access position of vertices
-        auto dv_pos = dv->position();
-        //auto pv_pos = m_evtc->GetPV(*pvc)->position();
-
         // access tracks from vertex
         auto tpLinks = dv->trackParticleLinks();
 
         xAOD::TrackParticle tp1 = **(tpLinks.at(0));
         xAOD::TrackParticle tp2 = **(tpLinks.at(1));
-
-        // remove overlapping muon
-        m_dilepdvc->ApplyOverlapRemoval(*dv);
 
         // remove bad electrons
         m_leptool->BadClusterRemoval(*dv);
@@ -524,8 +560,24 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // muon selection tool
         m_leptool->MuonSelection(*dv);
 
+        // remove overlapping muon
+        m_dilepdvc->ApplyOverlapRemoval(*dv);
+
+        // perform filter matching
+        m_dilepdvc->DoFilterMatching(*dv);
+
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
+
+        // find track invariant mass
+        float track_mass = m_dvutils->TrackMass(tp1, tp2) / 1000.; // in GeV
+
+        // find delta R between tracks
+        float deltaR = m_dvutils->getDeltaR(tp1, tp2);
+
+        // get position of DV
+        float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
+        float dv_z = m_dvutils->getz( *dv, *pv );                 // z in [mm]
 
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
@@ -564,17 +616,33 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
             m_dv_mumu_cf->Fill("DisabledModule", 1);
 
-            // material veto (only e)
-            //m_dv_mumu_cf->Fill("MaterialVeto (Only e)", 1);
+            // material veto (excluding mu)
+            m_dv_mumu_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_mumu_cf->Fill("TrackMass", 1);
 
-            // cosmic veto
-            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            m_dv_mumu_cf->Fill("R_{CR} > 0.04", 1);
+
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_mumu_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_mumu_cf->Fill("FilterMatching", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_mumu_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_mumu_cf->Fill("z_{DV} > 300 mm", 1);
 
             // end of cut flow. Now plotting
             ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
@@ -624,17 +692,32 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("DisabledModule", 1);
 
             // material veto
-            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            //m_dv_ee_cf->Fill("MaterialVeto", 1);
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            m_dv_ee_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_ee_cf->Fill("LowMassVeto", 1);
 
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_ee_cf->Fill("TrackMass", 1);
 
-            // cosmic veto
-            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            m_dv_ee_cf->Fill("R_{CR} > 0.04", 1);
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_ee_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_ee_cf->Fill("FilterMatching", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_ee_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -680,17 +763,32 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("DisabledModule", 1);
 
             // material veto
-            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            //m_dv_emu_cf->Fill("MaterialVeto", 1);
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            m_dv_emu_cf->Fill("MaterialVeto", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_emu_cf->Fill("LowMassVeto", 1);
 
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_emu_cf->Fill("TrackMass", 1);
 
-            // cosmic veto
-            if(!PassCosmicVeto(*dv_muc, *dv_elc, channel)) continue;
-            m_dv_emu_cf->Fill("R_{CR} > 0.04", 1);
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_emu_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_emu_cf->Fill("FilterMatching", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_emu_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -711,12 +809,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         if (channel == "mut") {
 
-            // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
-
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
-
             // mut pair
             m_dv_mut_cf->Fill("mux", 1);
 
@@ -736,31 +828,34 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
             m_dv_mut_cf->Fill("DisabledModule", 1);
 
-            // material veto (only e)
-            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            //m_dv_mut_cf->Fill("MaterialVeto (Only e)", 1);
+            // material veto (excluding mu)
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            m_dv_mut_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_mut_cf->Fill("LowMassVeto", 1);
-            
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_mut_cf->Fill("R_{CR} > 0.04", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
+
+
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_mut_cf->Fill("TrackMass", 1);
+
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_mut_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
 
             // plot dv
             plot_dv(*dv, *pv, channel);
             m_dv_mut_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
             m_dv_mut_deltaR->Fill(deltaR);
 
 
@@ -777,12 +872,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         }
 
         if (channel == "et") {
-
-            // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
-
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
 
             // et pair
             m_dv_et_cf->Fill("mux", 1);
@@ -803,31 +892,33 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
             m_dv_et_cf->Fill("DisabledModule", 1);
 
-            // material veto (only e)
-            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            //m_dv_et_cf->Fill("MaterialVeto (Only e)", 1);
+            // material veto (excluding mu)
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            m_dv_et_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_et_cf->Fill("LowMassVeto", 1);
+
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_et_cf->Fill("TrackMass", 1);
             
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_et_cf->Fill("R_{CR} > 0.04", 1);
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_et_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_et_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
 
             // plot dv
             plot_dv(*dv, *pv, channel);
             m_dv_et_chi2_ndof->Fill (dv->chiSquared() / dv->numberDoF() );
-
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
             m_dv_et_deltaR->Fill(deltaR);
 
 
@@ -842,13 +933,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
 
         }
 
-        if (channel == "trktrk") {
-
-            // access tracks from vertex
-            auto tpLinks = dv->trackParticleLinks();
-
-            xAOD::TrackParticle tp1 = **(tpLinks.at(0));
-            xAOD::TrackParticle tp2 = **(tpLinks.at(1));
+        if (channel == "idid") {
 
             // idid pair
             m_dv_idid_cf->Fill("xx", 1);
@@ -869,17 +954,34 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dvc->PassDisabledModuleVeto(*dv)) continue;
             m_dv_idid_cf->Fill("DisabledModule", 1);
 
-            // material veto (only e)
-            //if(!m_dvc->PassMaterialVeto(*dv)) continue;
-            //m_dv_idid_cf->Fill("MaterialVeto (Only e)", 1);
+            // material veto (excluding mu)
+            if(!m_dvc->PassMaterialVeto(*dv)) continue;
+            m_dv_idid_cf->Fill("MaterialVeto (excluding mu)", 1);
 
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_idid_cf->Fill("LowMassVeto", 1);
-            
-            // cosmic veto (R_CR)
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_idid_cf->Fill("R_{CR} > 0.04", 1);
+
+            // track invariant mass cut
+            //if(track_mass < track_mass_min) continue;
+            //m_dv_idid_cf->Fill("TrackMass", 1);
+
+            // track z0 wrt beam pipe
+            //if((tp1.z0() > 10) or (tp2.z0() > 10)) continue;
+            //m_dv_idid_cf->Fill("Track z_{0} < 10 mm (BP)", 1);
+
+            // RPVLL filter matching
+            //if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            //m_dv_idid_cf->Fill("FilterMatching", 1);
+
+            // DV R <  300 mm
+            if(dv_R > dv_R_max) continue;
+            m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
+
+            // DV z <  300 mm
+            if(dv_z > dv_z_max) continue;
+            m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
+
 
             //==========================================
             // plot xx distributions
@@ -965,17 +1067,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_track_d0_over_d0sigma->Fill((tp2).definingParameters()[0] / (tp2).definingParametersCovMatrixVec()[0]);
             m_track_z0_over_z0sigma->Fill((tp2).definingParameters()[1] / (tp2).definingParametersCovMatrixVec()[1]);
 
-            // deltaR plot
-            TLorentzVector tlv_tp0;
-            TLorentzVector tlv_tp1;
-
-            // define TLorentzVector of decay particles
-            tlv_tp0 = tp1.p4();
-            tlv_tp1 = tp2.p4();
-
-            float deltaR = tlv_tp0.DeltaR(tlv_tp1);
             m_dv_idid_deltaR->Fill(deltaR);
-
             n_dv_passed_cut++;
 
             // truth match
@@ -1149,7 +1241,7 @@ void DisplacedDimuonAnalysisAlg::plot_dv(const xAOD::Vertex& dv, const xAOD::Ver
         m_dv_emu_R_M->Fill(dv_R, dv_mass);
     }
 
-    if (channel == "trktrk"){
+    if (channel == "idid"){
         m_dv_idid_M->Fill(dv_mass);                             // dimuon mass
         m_dv_idid_R->Fill(dv_R);                                
         m_dv_idid_z->Fill(dv_z);                                

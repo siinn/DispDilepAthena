@@ -16,6 +16,7 @@ use AsgTools                    AsgTools-*                      Control/AthToolS
 
 # trigger matching tool
 use TriggerMatchingTool         TriggerMatchingTool-*           Trigger/TrigAnalysis
+use GoodRunsLists               GoodRunsLists-*                 DataQuality
 use TrigDecisionTool            TrigDecisionTool-*              Trigger/TrigAnalysis
 
 # DV

@@ -69,38 +69,11 @@ std::string DVUtils::DecayChannel(xAOD::Vertex& dv) {
     if ((dv_muc->size() == 1) and (dv_elc->size() == 1)) decayChannel = "emu";
     if ((dv_muc->size() == 1) and (dv_elc->size() == 0)) decayChannel = "mut";
     if ((dv_muc->size() == 0) and (dv_elc->size() == 1)) decayChannel = "et";
-    if ((dv_muc->size() == 0) and (dv_elc->size() == 0)) decayChannel = "trktrk";
+    if ((dv_muc->size() == 0) and (dv_elc->size() == 0)) decayChannel = "idid";
 
     return decayChannel;
 
 }
-
-// find decay channel of DV using two tracks
-//std::string DVUtils::DecayChannel(const xAOD::TrackParticle* tp1, const xAOD::TrackParticle* tp2) {
-//
-//    int n_mu = 0;
-//    int n_elc = 0;
-//
-//    // count muons
-//    if (IsGoodMuon(tp1)) n_mu++;
-//    if (IsGoodMuon(tp2))  n_mu++;
-//
-//    // count electrons
-//    if (IsGoodElectron(tp1)) n_elc++;
-//    if (IsGoodElectron(tp2))  n_elc++;
-//
-//    
-//    std::string decayChannel = "";
-//
-//    if (n_mu == 2) decayChannel = "mumu";
-//    if (n_elc == 2) decayChannel = "ee";
-//    if ((n_mu == 1) and (n_elc == 1)) decayChannel = "emu";
-//    if ((n_mu == 1) and (n_elc == 0)) decayChannel = "mut";
-//    if ((n_mu == 0) and (n_elc == 1)) decayChannel = "et";
-//    if ((n_mu == 0) and (n_elc == 0)) decayChannel = "trktrk";
-//
-//    return decayChannel;
-//}
 
 
 // trig matching
@@ -331,6 +304,36 @@ const xAOD::TruthVertex* DVUtils::IsSignalDV_loose(const DataVector<xAOD::Muon> 
 
     } // end of tru_vc
     return nullptr; // return null if there is no match (reco dv is not matched to truth)
+}
+
+
+float DVUtils::TrackMass (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    TLorentzVector tlv_total;
+
+    tlv_tp0 = tp1.p4();
+    tlv_tp1 = tp2.p4();
+    tlv_total = tlv_tp0 + tlv_tp1;
+
+    return tlv_total.M();
+}
+
+
+float DVUtils::getDeltaR (const xAOD::TrackParticle& tp1, const xAOD::TrackParticle& tp2){
+
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+
+    tlv_tp0 = tp1.p4();
+    tlv_tp1 = tp2.p4();
+
+    float deltaR_tlv = tlv_tp0.DeltaR(tlv_tp1);
+
+    return deltaR_tlv;
 }
 
 // trigger matching. check if one muon of DV is matched to trigger
@@ -827,8 +830,6 @@ bool DVUtils::IsReconstructedAsIDTrack(const xAOD::TruthParticle& tp) {
 // check if truth particle is signal muon from (Z')
 bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
 
-    // not reliable due to bremsstrahlung
-    // start from signal vertex and use FindFinalState
     return false;
 
 } // end of isSignal
@@ -838,13 +839,26 @@ bool DVUtils::isSignal (const xAOD::TruthParticle* p) {
 // check if truth vertex is signal vertex
 bool DVUtils::isSignalVertex (const xAOD::TruthVertex* v) {
 
-    if (!(v->nIncomingParticles() == 1)) return false;
-    if (!(v->nOutgoingParticles() == 2)) return false;
+    bool signal = true;
+
+    ATH_MSG_DEBUG("DEBUG: 0, nIncoming = " << v->nIncomingParticles() << ", nOutgoing = " << v->nOutgoingParticles());
+
+    if (!(v->nIncomingParticles() == 1)) signal = false;
+    if (!((v->nOutgoingParticles() == 2) or (v->nOutgoingParticles() == 3)))
+    {
+        signal = false;
+    }
 
     // access parent
     const xAOD::TruthParticle* parent = v->incomingParticle(0);
-    if ((parent->absPdgId() ==32)) return true;
-    else return false;
+    ATH_MSG_DEBUG("DEBUG: 1, parent->absPdgId() = " << parent->absPdgId());
+    if (!((parent->absPdgId() ==32) or (parent->absPdgId() ==1000022)))
+    {
+        signal = false;
+    }
+
+    ATH_MSG_DEBUG("DEBUG: 2, signal = " << signal);
+    return signal;
 
 } // end of isSignal
 
@@ -858,6 +872,10 @@ float DVUtils::TruthMass (const xAOD::TruthVertex* v) {
     for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
 
         const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
         outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
 
     } // end of outgoingn particle loop
@@ -875,6 +893,10 @@ float DVUtils::TruthPt (const xAOD::TruthVertex* v) {
     for (unsigned int i = 0; i < v->nOutgoingParticles(); i++) {
 
         const xAOD::TruthParticle* p = v->outgoingParticle(i);
+
+        // skip if particle is not charged (to remove neutrino from mass calculation)
+        if (p->isNeutral()) continue;
+
         outgoing_tlv += TLorentzVector( p->px(), p->py(), p->pz(), p->e());
     } // end of outgoingn particle loop
 
@@ -930,127 +952,6 @@ bool DVUtils::TrackSelection (const xAOD::TruthParticle* tp) {
 
 
 
-//// check if there is an associated lepton
-//bool DVUtils::IsLepton(const xAOD::TrackParticle* tp){
-//
-//    // return true if this tp is muon or electron
-//    if (IsMuon(tp) or IsElectron(tp)) {
-//        return true;
-//    }
-//    
-//    return false;
-//}
-
-// check if there is an associated muon
-//bool DVUtils::IsGoodMuon(const xAOD::TrackParticle* tp){
-//
-//    // if trc is a shallow copy: get original track
-//    auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*tp));
-//    if (orig_tr == nullptr) orig_tr = tp;
-//
-//    // if trc == VrtSecInclusive__SelectedTrackParticles (or a copy)
-//    if(m_accTr.isAvailable(*orig_tr)) {
-//        orig_tr = *(m_accTr(*orig_tr));
-//    }
-//
-//    // retrieve muon container
-//    const xAOD::MuonContainer* muc = nullptr;
-//    CHECK( evtStore()->retrieve( muc, "Muons" ) );
-//
-//    const xAOD::ElectronContainer* elc = nullptr;
-//    CHECK( evtStore()->retrieve( elc, "Electrons" ));
-//
-//    // make copy of muon container
-//    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-//    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-//
-//    auto elc_copy = xAOD::shallowCopyContainer(*elc);
-//    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
-//
-//    // apply overlap removal
-//    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
-//    
-//    // loop over muon container, looking for matched reco muon
-//    for(auto mu: *muc_copy.first) {
-//    //for(auto mu: *muc) {
-//
-//        auto mu_tr = mu->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
-//        if(mu_tr == nullptr) continue;
-//
-//        if(orig_tr == mu_tr) {
-//            // now apply muon requirement
-//
-//            // overlap removal
-//            if(m_or->IsOverlap(*mu)) continue;
-//
-//            // apply muon selection
-//            if(!m_leptool->MuonSelection(*mu)) continue;
-//
-//            // found muon with the same id track
-//            return true;    
-//        }
-//    }
-//
-//    return false;
-//}
-//
-//// check if there is an associated muon
-//bool DVUtils::IsGoodElectron(const xAOD::TrackParticle* tp){
-//
-//    // if trc is a shallow copy: get original track
-//    auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*tp));
-//    if (orig_tr == nullptr) orig_tr = tp;
-//
-//    // if trc == VrtSecInclusive__SelectedTrackParticles (or a copy)
-//    if(m_accTr.isAvailable(*orig_tr)) {
-//        orig_tr = *(m_accTr(*orig_tr));
-//    }
-//
-//    // retrieve muon container
-//    const xAOD::MuonContainer* muc = nullptr;
-//    CHECK( evtStore()->retrieve( muc, "Muons" ) );
-//
-//    const xAOD::ElectronContainer* elc = nullptr;
-//    CHECK( evtStore()->retrieve( elc, "Electrons" ));
-//
-//    // make copy of muon container
-//    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-//    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-//
-//    auto elc_copy = xAOD::shallowCopyContainer(*elc);
-//    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
-//
-//    // apply overlap removal
-//    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
-//    
-//    // loop over electron container, looking for matched reco electron
-//    for(auto el: *elc_copy.first) {
-//
-//        auto el_tr = xAOD::EgammaHelpers::getOriginalTrackParticle(el);
-//        if(el_tr == nullptr) continue;
-//        
-//        if(orig_tr == el_tr) {
-//            // now apply electron requirement
-//
-//            // overlap removal
-//            if(m_or->IsOverlap(*el)) continue;
-//
-//            // remove bad electrons
-//            if(!m_leptool->BadClusterRemoval(*el)) continue;
-//
-//            // kinematic cut
-//            if(!m_leptool->ElectronKinematicCut(*el)) continue;
-//
-//            // Electron identification
-//            if(!m_leptool->ElectronID(*el)) continue;
-//
-//            // found electron with the same id track
-//            return true;    
-//        }
-//    }
-//
-//    return false;
-//}
 
 
 // check if event pass RPVLL filter

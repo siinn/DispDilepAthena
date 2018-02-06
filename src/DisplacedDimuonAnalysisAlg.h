@@ -15,8 +15,9 @@
 #include "DDLBase/IEventCuts.h"
 #include "DDLBase/IDVCuts.h"
 #include "DDLBase/IDiLepDVCuts.h"
-#include "DDLBase/IDiLepCosmics.h"
 #include "DDLBase/IOverlapRemoval.h"
+#include "DDLBase/IDiLepCosmics.h"
+#include "DDLBase/IPhotonMatch.h"
 
 // DVUtil
 #include "DispDilepAthena/DVUtils.h"
@@ -56,18 +57,19 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
     private:
 
         // setting tools
-        ToolHandle<DDL::IEventCuts> m_evtc; //!
-        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
-        ToolHandle<DDL::IDVCuts> m_dvc;
-        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
         ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!
-        ToolHandle<DDL::IOverlapRemoval> m_or;
         ToolHandle<Trig::IMatchingTool> m_tmt; //!
+        ToolHandle<DDL::IOverlapRemoval> m_or;
+        ToolHandle<DDL::IEventCuts> m_evtc; //!
+        ToolHandle<DDL::IDiLepDVCuts> m_dilepdvc;
+        ToolHandle<DDL::IDVCuts> m_dvc;
+        ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
+        ToolHandle<DDL::IPhotonMatch> m_phmatch;
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

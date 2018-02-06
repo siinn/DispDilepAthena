@@ -45,7 +45,7 @@ class LeptonSelectionTools : public AthAlgTool, virtual public ILeptonSelectionT
 
     private:
 
-        ToolHandle<IAsgElectronLikelihoodTool> m_LooseLH;
+        ToolHandle<IAsgElectronLikelihoodTool> m_elt;
         ToolHandle<CP::IMuonSelectionTool> m_mst;
         ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_mct;
 

@@ -375,8 +375,39 @@ StatusCode FlipBkgEst::execute() {
     // flag to check if data or MC
     isMC = evtInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
+    // retrieve lepton and track container
+    const xAOD::MuonContainer* muc = nullptr;
+    CHECK( evtStore()->retrieve( muc, "Muons" ));
+
+    const xAOD::ElectronContainer* elc = nullptr;
+    CHECK( evtStore()->retrieve( elc, "Electrons" ));
+
+    //const xAOD::TrackParticleContainer* vsc = nullptr;
+    //CHECK( evtStore()->retrieve( vsc, "VrtSecInclusive_SelectedTrackParticles" ));
+
+    const xAOD::TrackParticleContainer* idc = nullptr;
+    CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
+
     // flag to check trigger
     bool trig_passed = false;
+
+    // make copies of leptons
+    auto muc_copy = xAOD::shallowCopyContainer(*muc);
+    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
+
+    auto elc_copy = xAOD::shallowCopyContainer(*elc);
+    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
+
+    auto idc_copy = xAOD::shallowCopyContainer(*idc);
+    xAOD::setOriginalObjectLink(*idc, *idc_copy.first);
+
+    // apply overlap removal
+    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
+
+    //---------------------------------------
+    // Event cut flow
+    //---------------------------------------
 
     // GRL
     if (!isMC and !m_grlTool->passRunLB(*evtInfo)) return StatusCode::SUCCESS;
@@ -392,32 +423,6 @@ StatusCode FlipBkgEst::execute() {
 
     if(!trig_passed) return StatusCode::SUCCESS;
 
-    // retrieve lepton and track container
-    const xAOD::MuonContainer* muc = nullptr;
-    CHECK( evtStore()->retrieve( muc, "Muons" ));
-
-    const xAOD::ElectronContainer* elc = nullptr;
-    CHECK( evtStore()->retrieve( elc, "Electrons" ));
-
-    //const xAOD::TrackParticleContainer* vsc = nullptr;
-    //CHECK( evtStore()->retrieve( vsc, "VrtSecInclusive_SelectedTrackParticles" ));
-
-    const xAOD::TrackParticleContainer* idc = nullptr;
-    CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
-
-    // make copies of leptons
-    auto muc_copy = xAOD::shallowCopyContainer(*muc);
-    xAOD::setOriginalObjectLink(*muc, *muc_copy.first);
-
-    auto elc_copy = xAOD::shallowCopyContainer(*elc);
-    xAOD::setOriginalObjectLink(*elc, *elc_copy.first);
-
-    auto idc_copy = xAOD::shallowCopyContainer(*idc);
-    xAOD::setOriginalObjectLink(*idc, *idc_copy.first);
-
-    // apply overlap removal
-    m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
-
     // retrieve primary vertices
     //const xAOD::VertexContainer* pvc = nullptr;
     CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
@@ -425,15 +430,6 @@ StatusCode FlipBkgEst::execute() {
     // get primary vertex
     auto pv = m_evtc->GetPV(*pvc);
     auto pv_pos = m_evtc->GetPV(*pvc)->position();
-
-    // create container for good tracks
-    //auto el_sel     = new xAOD::TrackParticleContainer();
-    //auto el_sel_aux = new xAOD::TrackParticleAuxContainer();
-    //el_sel->setStore(el_sel_aux);
-
-    //auto mu_sel     = new xAOD::TrackParticleContainer();
-    //auto mu_sel_aux = new xAOD::TrackParticleAuxContainer();
-    //mu_sel->setStore(mu_sel_aux);
 
     auto id_sel     = new xAOD::TrackParticleContainer();
     auto id_sel_aux = new xAOD::TrackParticleAuxContainer();
@@ -471,11 +467,6 @@ StatusCode FlipBkgEst::execute() {
 
         if(!m_vertexer->GoodTrack(*mu_tr)) continue;
 
-        //// copy ID track
-        //xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
-        //mu_sel->push_back(tr_ptr);
-        //xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
-
         // mark ID track as muon
         mu_tr->auxdecor<int>("muon") = 1;
         ATH_MSG_DEBUG("DEBUG: Found muon, ptr = " << mu_tr);
@@ -508,11 +499,6 @@ StatusCode FlipBkgEst::execute() {
 
         if(!m_vertexer->GoodTrack(*el_tr)) continue;
 
-        //// copy ID track
-        //xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
-        //el_sel->push_back(tr_ptr);
-        //xAOD::safeDeepCopy(*el_tr, *tr_ptr);
-
         // mark ID track as electron
         el_tr->auxdecor<int>("electron") = 1;
         ATH_MSG_DEBUG("DEBUG: Found electron, ptr = " << el_tr);
@@ -540,9 +526,6 @@ StatusCode FlipBkgEst::execute() {
         xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
         id_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*id_tr, *tr_ptr);
-
-        //// decorate track with p4
-        //m_acc_p4(*tr_ptr) = id_tr->p4();
 
         // decorate track with flipping status
         tr_ptr->auxdecor<std::string>("Flip") = "new";
@@ -741,12 +724,20 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             // count refit-succeeded vertices
             n_refit_noflip_succeeded++;
 
+            // mass and position cut
+            float dv_R_max = 300;
+            float dv_z_max = 300;
+
             // access position of vertices
             auto dv_pos = fit->position();
             auto pv_pos = m_evtc->GetPV(*pvc)->position();
    
             // distance in 3d vector
             auto dist = pv_pos - dv_pos;
+
+            // get position of DV
+            float dv_R = dist.perp();                 // R in [mm]
+            float dv_z = dist.z();                    // z in [mm]
    
             // position of vertex w.r.t. pv
             float vtx_perp = dist.perp();
@@ -784,15 +775,19 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if (pass_vertex) m_mumu_cf_noflip->Fill("DisabledModule", 1);
 
                 // material veto
-                //m_mumu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                m_mumu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -835,16 +830,20 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if (pass_vertex) m_emu_cf_noflip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_emu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -886,16 +885,20 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if (pass_vertex) m_ee_cf_noflip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_ee_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -933,17 +936,21 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_noflip->Fill("DisabledModule", 1);
 
-                // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_idid_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                // material veto (excl. mu)
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1069,16 +1076,20 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if (pass_vertex) m_mut_cf_noflip->Fill("DisabledModule", 1);
 
                 // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_mut_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1121,16 +1132,20 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if (pass_vertex) m_et_cf_noflip->Fill("DisabledModule", 1);
 
                 // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_et_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if(pass_vertex) m_et_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if(pass_vertex) m_et_cf_noflip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if(pass_vertex) m_et_cf_noflip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_et_cf_noflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1170,12 +1185,20 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             // count refit-succeeded vertices
             n_refit_flip_succeeded++;
 
+            // mass and position cut
+            float dv_R_max = 300;
+            float dv_z_max = 300;
+
             // access position of vertices
             auto dv_pos = fit->position();
             auto pv_pos = m_evtc->GetPV(*pvc)->position();
    
             // distance in 3d vector
             auto dist = pv_pos - dv_pos;
+
+            // get position of DV
+            float dv_R = dist.perp();                 // R in [mm]
+            float dv_z = dist.z();                    // z in [mm]
    
             // position of vertex w.r.t. pv
             float vtx_perp = dist.perp();
@@ -1213,15 +1236,19 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_mumu_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto
-                //m_mumu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                m_mumu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1264,16 +1291,20 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_emu_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_emu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1315,16 +1346,20 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_ee_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_ee_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1363,16 +1398,21 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_idid_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_idid_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;;
+                if (pass_vertex) m_idid_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1509,16 +1549,20 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_mut_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) return;
-                //m_mut_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1574,16 +1618,21 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_et_cf_flip->Fill("DisabledModule", 1);
 
                 // material veto
-                //if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                //if (pass_vertex) m_et_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
+                if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_et_cf_flip->Fill("LowMassVeto", 1);
 
-                // cosmic veto (R_CR)
-                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
-                if (pass_vertex) m_et_cf_flip->Fill("R_{CR} > 0.04", 1);
+                // DV R <  300 mm
+                if(dv_R > dv_R_max) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("R_{DV} > 300 mm", 1);
+
+                // DV z <  300 mm
+                if(dv_z > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1787,3 +1836,4 @@ bool FlipBkgEst::RefitVertex(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2,
 
     return sc;
 }
+
