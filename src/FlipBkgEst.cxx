@@ -85,50 +85,56 @@ StatusCode FlipBkgEst::initialize() {
     m_n_elc_sel = new TH1D( "m_n_elc_sel", "Number of selected electrons in event", 100,0,100);
     m_n_id_sel = new TH1D( "m_n_id_sel", "Number of selected id tracks in event", 500,0,500);
 
-    m_mumu_cf_noflip = new TH1D( "m_mumu_cf_noflip", "mumu cutflow (no flip)", 9,0,9);
-    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 9,0,9);
+    m_mumu_cf_nonflip = new TH1D( "m_mumu_cf_nonflip", "mumu cutflow (no flip)", 11,0,11);
+    m_mumu_cf_flip = new TH1D( "m_mumu_cf_flip", "mumu cutflow (flip)", 11,0,11);
 
-    m_ee_cf_noflip = new TH1D( "m_ee_cf_noflip", "ee cutflow (no flip)", 9,0,9);
-    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 9,0,9);
+    m_ee_cf_nonflip = new TH1D( "m_ee_cf_nonflip", "ee cutflow (no flip)", 11,0,11);
+    m_ee_cf_flip = new TH1D( "m_ee_cf_flip", "ee cutflow (flip)", 11,0,11);
 
-    m_emu_cf_noflip = new TH1D( "m_emu_cf_noflip", "emu cutflow (no flip)", 9,0,9);
-    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 9,0,9);
+    m_emu_cf_nonflip = new TH1D( "m_emu_cf_nonflip", "emu cutflow (no flip)", 11,0,11);
+    m_emu_cf_flip = new TH1D( "m_emu_cf_flip", "emu cutflow (flip)", 11,0,11);
 
-    m_idid_cf_noflip = new TH1D( "m_idid_cf_noflip", "idid cutflow (no flip)", 8,0,8);
-    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 8,0,8);
+    m_idid_cf_nonflip = new TH1D( "m_idid_cf_nonflip", "idid cutflow (no flip)", 10,0,10);
+    m_idid_cf_flip = new TH1D( "m_idid_cf_flip", "idid cutflow (flip)", 10,0,10);
 
-    m_mut_cf_noflip = new TH1D( "m_mut_cf_noflip", "mut cutflow (no flip)", 8,0,8);
-    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 8,0,8);
+    m_mut_cf_nonflip = new TH1D( "m_mut_cf_nonflip", "mut cutflow (no flip)", 10,0,10);
+    m_mut_cf_flip = new TH1D( "m_mut_cf_flip", "mut cutflow (flip)", 10,0,10);
 
-    m_et_cf_noflip = new TH1D( "m_et_cf_noflip", "et cutflow (no flip)", 8,0,8);
-    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 8,0,8);
+    m_et_cf_nonflip = new TH1D( "m_et_cf_nonflip", "et cutflow (no flip)", 10,0,10);
+    m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 10,0,10);
 
-    m_mumu_noflip_R = new TH1F( "m_mumu_noflip_R", "vertex R (no flip)", 200,0,600);
-    m_mumu_noflip_z = new TH1F( "m_mumu_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_mumu_noflip_M = new TH1F( "m_mumu_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_mumu_nonflip_R = new TH1F( "m_mumu_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_mumu_nonflip_z = new TH1F( "m_mumu_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_mumu_nonflip_M = new TH1F( "m_mumu_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_mumu_nonflip_Rcos = new TH1F( "m_mumu_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 200,0,600);
     m_mumu_flip_z = new TH1F( "m_mumu_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_mumu_flip_Rcos = new TH1F( "m_mumu_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_ee_noflip_R = new TH1F( "m_ee_noflip_R", "vertex R (no flip)", 200,0,600);
-    m_ee_noflip_z = new TH1F( "m_ee_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_ee_noflip_M = new TH1F( "m_ee_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_ee_nonflip_R = new TH1F( "m_ee_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_ee_nonflip_z = new TH1F( "m_ee_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_ee_nonflip_M = new TH1F( "m_ee_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_ee_nonflip_Rcos = new TH1F( "m_ee_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 200,0,600);
     m_ee_flip_z = new TH1F( "m_ee_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_ee_flip_Rcos = new TH1F( "m_ee_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_emu_noflip_R = new TH1F( "m_emu_noflip_R", "vertex R (no flip)", 200,0,600);
-    m_emu_noflip_z = new TH1F( "m_emu_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_emu_noflip_M = new TH1F( "m_emu_noflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_emu_nonflip_R = new TH1F( "m_emu_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_emu_nonflip_z = new TH1F( "m_emu_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_emu_nonflip_M = new TH1F( "m_emu_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_emu_nonflip_Rcos = new TH1F( "m_emu_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 200,0,600);
     m_emu_flip_z = new TH1F( "m_emu_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_emu_flip_Rcos = new TH1F( "m_emu_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_idid_noflip_M = new TH1F( "m_idid_noflip_M", "mass in GeV", 1000, 0, 1000);
-    m_idid_noflip_R = new TH1F( "m_idid_noflip_R", "vertex R (no flip)", 600,0,600);
-    m_idid_noflip_z = new TH1F( "m_idid_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_idid_noflip_l = new TH1F( "m_idid_noflip_l", "vertex l (no flip)", 100, 0, 1000.);
-    m_idid_noflip_n_tracks = new TH1F( "m_idid_noflip_n_tracks", "vertex vs track multiplicity (noflip)", 500,0,500);
+    m_idid_nonflip_M = new TH1F( "m_idid_nonflip_M", "mass in GeV", 1000, 0, 1000);
+    m_idid_nonflip_R = new TH1F( "m_idid_nonflip_R", "vertex R (no flip)", 600,0,600);
+    m_idid_nonflip_z = new TH1F( "m_idid_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_idid_nonflip_l = new TH1F( "m_idid_nonflip_l", "vertex l (no flip)", 100, 0, 1000.);
+    m_idid_nonflip_n_tracks = new TH1F( "m_idid_nonflip_n_tracks", "vertex vs track multiplicity (nonflip)", 500,0,500);
 
     m_idid_flip_M = new TH1F("m_idid_flip_M","mass in GeV", 1000, 0, 1000. );
     m_idid_flip_R = new TH1F( "m_idid_flip_R", "vertex R (flip)", 600,0,600);
@@ -138,46 +144,50 @@ StatusCode FlipBkgEst::initialize() {
     m_idid_flip_deltaR = new TH1F( "m_idid_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
     m_idid_flip_chi2_ndof = new TH1F("m_idid_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
-    m_mut_noflip_R = new TH1F( "m_mut_noflip_R", "vertex R (no flip)", 600,0,600);
-    m_mut_noflip_z = new TH1F( "m_mut_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_mut_nonflip_R = new TH1F( "m_mut_nonflip_R", "vertex R (no flip)", 600,0,600);
+    m_mut_nonflip_z = new TH1F( "m_mut_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_mut_nonflip_Rcos = new TH1F( "m_mut_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_mut_flip_M = new TH1F("m_mut_flip_M","DV mass in GeV", 1000, 0, 1000. );
     m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 600,0,600);
     m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 100, 0, 2000.);
+    m_mut_flip_Rcos = new TH1F( "m_mut_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_mut_flip_deltaR = new TH1F( "m_mut_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
     m_mut_flip_chi2_ndof = new TH1F("m_mut_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
-    m_et_noflip_R = new TH1F( "m_et_noflip_R", "vertex R (no flip)", 600,0,600);
-    m_et_noflip_z = new TH1F( "m_et_noflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_et_nonflip_R = new TH1F( "m_et_nonflip_R", "vertex R (no flip)", 600,0,600);
+    m_et_nonflip_z = new TH1F( "m_et_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
+    m_et_nonflip_Rcos = new TH1F( "m_et_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_et_flip_M = new TH1F("m_et_flip_M","DV mass in GeV", 1000, 0, 1000. );
     m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 600,0,600);
     m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 100, 0, 2000.);
+    m_et_flip_Rcos = new TH1F( "m_et_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
     m_et_flip_deltaR = new TH1F( "m_et_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
     m_et_flip_chi2_ndof = new TH1F("m_et_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
     // Track parameters
-    m_track_noflip_p = new TH1F( "m_track_noflip_p", "track p", 10000,0,1000);
-    m_track_noflip_pt = new TH1F( "m_track_noflip_pt", "track pt", 10000,0,1000);
-    m_track_noflip_z0 = new TH1F( "m_track_noflip_z0", "track z0", 2000,-1000,1000);
-    m_track_noflip_d0 = new TH1F( "m_track_noflip_d0", "track d0", 600,-300,300);
-    m_track_noflip_phi = new TH1F( "m_track_noflip_phi", "track phi", 1000,-M_PI,M_PI);
-    m_track_noflip_theta = new TH1F( "m_track_noflip_theta", "track theta", 200,0,M_PI);
-    m_track_noflip_d0sigma = new TH1F( "m_track_noflip_d0sigma", "d0sigma (no flip)", 500,0,50);
-    m_track_noflip_z0sigma = new TH1F( "m_track_noflip_z0sigma", "z0sigma (no flip)", 2000,-100,100);
-    m_track_noflip_d0_over_d0sigma = new TH1F( "m_track_noflip_d0_d0sigma", "d0/d0sigma (no flip)", 500,0,50);
-    m_track_noflip_z0_over_z0sigma = new TH1F( "m_track_noflip_z0_z0sigma", "z0/z0sigma (no flip)", 2000,-100,100);
+    m_track_nonflip_p = new TH1F( "m_track_nonflip_p", "track p", 10000,0,1000);
+    m_track_nonflip_pt = new TH1F( "m_track_nonflip_pt", "track pt", 10000,0,1000);
+    m_track_nonflip_z0 = new TH1F( "m_track_nonflip_z0", "track z0", 2000,-1000,1000);
+    m_track_nonflip_d0 = new TH1F( "m_track_nonflip_d0", "track d0", 600,-300,300);
+    m_track_nonflip_phi = new TH1F( "m_track_nonflip_phi", "track phi", 1000,-M_PI,M_PI);
+    m_track_nonflip_theta = new TH1F( "m_track_nonflip_theta", "track theta", 200,0,M_PI);
+    m_track_nonflip_d0sigma = new TH1F( "m_track_nonflip_d0sigma", "d0sigma (no flip)", 500,0,50);
+    m_track_nonflip_z0sigma = new TH1F( "m_track_nonflip_z0sigma", "z0sigma (no flip)", 2000,-100,100);
+    m_track_nonflip_d0_over_d0sigma = new TH1F( "m_track_nonflip_d0_d0sigma", "d0/d0sigma (no flip)", 500,0,50);
+    m_track_nonflip_z0_over_z0sigma = new TH1F( "m_track_nonflip_z0_z0sigma", "z0/z0sigma (no flip)", 2000,-100,100);
 
-    m_track_noflip_p_wrtSV = new TH1F( "m_track_noflip_p_wrtSV", "track p_wrtSV", 10000,0,1000);
-    m_track_noflip_pt_wrtSV = new TH1F( "m_track_noflip_pt_wrtSV", "track pt_wrtSV", 10000,0,1000);
-    m_track_noflip_z0_wrtSV = new TH1F( "m_track_noflip_z0_wrtSV", "track z0_wrtSV", 20000,-1000,1000);
-    m_track_noflip_d0_wrtSV = new TH1F( "m_track_noflip_d0_wrtSV", "track d0_wrtSV", 6000,-300,300);
-    m_track_noflip_phi_wrtSV = new TH1F( "m_track_noflip_phi_wrtSV", "track phi_wrtSV", 1000,-M_PI,M_PI);
-    m_track_noflip_theta_wrtSV = new TH1F( "m_track_noflip_theta_wrtSV", "track theta_wrtSV", 200,0,M_PI);
-    m_track_noflip_d0sigma_wrtSV = new TH1F( "m_track_noflip_d0sigma_wrtSV", "d0sigma_wrtSV (no flip)", 500,0,50);
-    m_track_noflip_z0sigma_wrtSV = new TH1F( "m_track_noflip_z0sigma_wrtSV", "z0sigma_wrtSV (no flip)", 2000,-100,100);
-    m_track_noflip_d0_over_d0sigma_wrtSV = new TH1F( "m_track_noflip_d0_d0sigma_wrtSV", "d0/d0sigma_wrtSV (no flip)", 500,0,50);
-    m_track_noflip_z0_over_z0sigma_wrtSV = new TH1F( "m_track_noflip_z0_z0sigma_wrtSV", "z0/z0sigma_wrtSV (no flip)", 2000,-100,100);
+    m_track_nonflip_p_wrtSV = new TH1F( "m_track_nonflip_p_wrtSV", "track p_wrtSV", 10000,0,1000);
+    m_track_nonflip_pt_wrtSV = new TH1F( "m_track_nonflip_pt_wrtSV", "track pt_wrtSV", 10000,0,1000);
+    m_track_nonflip_z0_wrtSV = new TH1F( "m_track_nonflip_z0_wrtSV", "track z0_wrtSV", 20000,-1000,1000);
+    m_track_nonflip_d0_wrtSV = new TH1F( "m_track_nonflip_d0_wrtSV", "track d0_wrtSV", 6000,-300,300);
+    m_track_nonflip_phi_wrtSV = new TH1F( "m_track_nonflip_phi_wrtSV", "track phi_wrtSV", 1000,-M_PI,M_PI);
+    m_track_nonflip_theta_wrtSV = new TH1F( "m_track_nonflip_theta_wrtSV", "track theta_wrtSV", 200,0,M_PI);
+    m_track_nonflip_d0sigma_wrtSV = new TH1F( "m_track_nonflip_d0sigma_wrtSV", "d0sigma_wrtSV (no flip)", 500,0,50);
+    m_track_nonflip_z0sigma_wrtSV = new TH1F( "m_track_nonflip_z0sigma_wrtSV", "z0sigma_wrtSV (no flip)", 2000,-100,100);
+    m_track_nonflip_d0_over_d0sigma_wrtSV = new TH1F( "m_track_nonflip_d0_d0sigma_wrtSV", "d0/d0sigma_wrtSV (no flip)", 500,0,50);
+    m_track_nonflip_z0_over_z0sigma_wrtSV = new TH1F( "m_track_nonflip_z0_z0sigma_wrtSV", "z0/z0sigma_wrtSV (no flip)", 2000,-100,100);
 
     m_track_flip_p = new TH1F( "m_track_flip_p", "track p", 10000,0,1000);
     m_track_flip_pt = new TH1F( "m_track_flip_pt", "track pt", 10000,0,1000);
@@ -210,51 +220,57 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_elc_sel", m_n_elc_sel) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/n_id_sel", m_n_id_sel) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_noflip", m_mumu_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_nonflip", m_mumu_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_cf_flip", m_mumu_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_noflip", m_ee_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_nonflip", m_ee_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_cf_flip", m_ee_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_noflip", m_emu_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_nonflip", m_emu_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_cf_flip", m_emu_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_noflip", m_idid_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_nonflip", m_idid_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_cf_flip", m_idid_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_noflip", m_mut_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_nonflip", m_mut_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_cf_flip", m_mut_cf_flip) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_noflip", m_et_cf_noflip) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_nonflip", m_et_cf_nonflip) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_cf_flip", m_et_cf_flip) );
 
     // vertex distribution
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_R", m_mumu_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_z", m_mumu_noflip_z) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_noflip_M", m_mumu_noflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_nonflip_R", m_mumu_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_nonflip_z", m_mumu_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_nonflip_M", m_mumu_nonflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_nonflip_Rcos", m_mumu_nonflip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_R", m_mumu_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_z", m_mumu_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_M", m_mumu_flip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mumu/mumu_flip_Rcos", m_mumu_flip_Rcos) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_R", m_ee_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_z", m_ee_noflip_z) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_noflip_M", m_ee_noflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_nonflip_R", m_ee_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_nonflip_z", m_ee_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_nonflip_M", m_ee_nonflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_nonflip_Rcos", m_ee_nonflip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_R", m_ee_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_z", m_ee_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_M", m_ee_flip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_ee/ee_flip_Rcos", m_ee_flip_Rcos) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_R", m_emu_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_z", m_emu_noflip_z) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_noflip_M", m_emu_noflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_nonflip_R", m_emu_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_nonflip_z", m_emu_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_nonflip_M", m_emu_nonflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_nonflip_Rcos", m_emu_nonflip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_R", m_emu_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_z", m_emu_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_M", m_emu_flip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_emu/emu_flip_Rcos", m_emu_flip_Rcos) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_M", m_idid_noflip_M) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_R", m_idid_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_z", m_idid_noflip_z) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_l", m_idid_noflip_l) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_noflip_n_tracks", m_idid_noflip_n_tracks) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_nonflip_M", m_idid_nonflip_M) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_nonflip_R", m_idid_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_nonflip_z", m_idid_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_nonflip_l", m_idid_nonflip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_nonflip_n_tracks", m_idid_nonflip_n_tracks) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_M", m_idid_flip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_R", m_idid_flip_R) );
@@ -264,46 +280,50 @@ StatusCode FlipBkgEst::initialize() {
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_deltaR", m_idid_flip_deltaR) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/idid_flip_chi2_ndof", m_idid_flip_chi2_ndof) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_noflip_R", m_mut_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_noflip_z", m_mut_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_nonflip_R", m_mut_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_nonflip_z", m_mut_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_nonflip_Rcos", m_mut_nonflip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_R", m_mut_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_z", m_mut_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_M", m_mut_flip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_l", m_mut_flip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_Rcos", m_mut_flip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_deltaR", m_mut_flip_deltaR) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_mut/mut_flip_chi2_ndof", m_mut_flip_chi2_ndof) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_noflip_R", m_et_noflip_R) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_noflip_z", m_et_noflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_nonflip_R", m_et_nonflip_R) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_nonflip_z", m_et_nonflip_z) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_nonflip_Rcos", m_et_nonflip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_R", m_et_flip_R) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_z", m_et_flip_z) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_M", m_et_flip_M) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_l", m_et_flip_l) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_Rcos", m_et_flip_Rcos) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_deltaR", m_et_flip_deltaR) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_et/et_flip_chi2_ndof", m_et_flip_chi2_ndof) );
 
     // track parameters
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_p", m_track_noflip_p) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_pt", m_track_noflip_pt) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0", m_track_noflip_z0) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0", m_track_noflip_d0) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_phi", m_track_noflip_phi) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_theta", m_track_noflip_theta) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0sigma", m_track_noflip_d0sigma) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0sigma", m_track_noflip_z0sigma) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_d0_over_d0sigma", m_track_noflip_d0_over_d0sigma) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_noflip_z0_over_z0sigma", m_track_noflip_z0_over_z0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_p", m_track_nonflip_p) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_pt", m_track_nonflip_pt) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_z0", m_track_nonflip_z0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_d0", m_track_nonflip_d0) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_phi", m_track_nonflip_phi) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_theta", m_track_nonflip_theta) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_d0sigma", m_track_nonflip_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_z0sigma", m_track_nonflip_z0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_d0_over_d0sigma", m_track_nonflip_d0_over_d0sigma) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_nonflip_z0_over_z0sigma", m_track_nonflip_z0_over_z0sigma) );
 
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_p_wrtSV", m_track_noflip_p_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_pt_wrtSV", m_track_noflip_pt_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0_wrtSV", m_track_noflip_z0_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0_wrtSV", m_track_noflip_d0_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_phi_wrtSV", m_track_noflip_phi_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_theta_wrtSV", m_track_noflip_theta_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0sigma_wrtSV", m_track_noflip_d0sigma_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0sigma_wrtSV", m_track_noflip_z0sigma_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_d0_over_d0sigma_wrtSV", m_track_noflip_d0_over_d0sigma_wrtSV) );
-    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_noflip_z0_over_z0sigma_wrtSV", m_track_noflip_z0_over_z0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_p_wrtSV", m_track_nonflip_p_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_pt_wrtSV", m_track_nonflip_pt_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_z0_wrtSV", m_track_nonflip_z0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_d0_wrtSV", m_track_nonflip_d0_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_phi_wrtSV", m_track_nonflip_phi_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_theta_wrtSV", m_track_nonflip_theta_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_d0sigma_wrtSV", m_track_nonflip_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_z0sigma_wrtSV", m_track_nonflip_z0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_d0_over_d0sigma_wrtSV", m_track_nonflip_d0_over_d0sigma_wrtSV) );
+    CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtSV/track_nonflip_z0_over_z0sigma_wrtSV", m_track_nonflip_z0_over_z0sigma_wrtSV) );
 
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_p", m_track_flip_p) );
     CHECK( histSvc->regHist("/DV/FlipBkgEst/dv_idid/track_wrtBeam/track_flip_pt", m_track_flip_pt) );
@@ -344,8 +364,8 @@ StatusCode FlipBkgEst::initialize() {
     // counting vertex failed on refitting
     int n_refit_flip_failed = 0;
     int n_refit_flip_succeeded = 0;
-    int n_refit_noflip_failed = 0;
-    int n_refit_noflip_succeeded = 0;
+    int n_refit_nonflip_failed = 0;
+    int n_refit_nonflip_succeeded = 0;
 
     return StatusCode::SUCCESS;
 }
@@ -356,8 +376,8 @@ StatusCode FlipBkgEst::finalize() {
 
     ATH_MSG_INFO("n_trk_noperigee = " << n_trk_noperigee);
 
-    ATH_MSG_INFO("n_refit_noflip_failed = " << n_refit_noflip_failed);
-    ATH_MSG_INFO("n_refit_noflip_succeeded = " << n_refit_noflip_succeeded);
+    ATH_MSG_INFO("n_refit_nonflip_failed = " << n_refit_nonflip_failed);
+    ATH_MSG_INFO("n_refit_nonflip_succeeded = " << n_refit_nonflip_succeeded);
     ATH_MSG_INFO("n_refit_flip_failed = " << n_refit_flip_failed);
     ATH_MSG_INFO("n_refit_flip_succeeded = " << n_refit_flip_succeeded);
 
@@ -387,6 +407,10 @@ StatusCode FlipBkgEst::execute() {
 
     const xAOD::TrackParticleContainer* idc = nullptr;
     CHECK( evtStore()->retrieve( idc, "InDetTrackParticles" ));
+
+    // retrieve primary vertices
+    //const xAOD::VertexContainer* pvc = nullptr;
+    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
 
     // flag to check trigger
     bool trig_passed = false;
@@ -419,13 +443,10 @@ StatusCode FlipBkgEst::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    //if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
-
     if(!trig_passed) return StatusCode::SUCCESS;
 
-    // retrieve primary vertices
-    //const xAOD::VertexContainer* pvc = nullptr;
-    CHECK( evtStore()->retrieve( pvc, "PrimaryVertices" ));
+    // cosmic veto
+    if(!m_cos->PassCosmicEventVeto(*elc, *muc)) return StatusCode::SUCCESS;
 
     // get primary vertex
     auto pv = m_evtc->GetPV(*pvc);
@@ -722,7 +743,7 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
         //if(true){
 
             // count refit-succeeded vertices
-            n_refit_noflip_succeeded++;
+            n_refit_nonflip_succeeded++;
 
             // mass and position cut
             float dv_R_max = 300;
@@ -737,68 +758,82 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
 
             // get position of DV
             float dv_R = dist.perp();                 // R in [mm]
-            float dv_z = dist.z();                    // z in [mm]
+            float dv_z_abs = std::abs(dist.z());      // z in [mm]
    
             // position of vertex w.r.t. pv
-            float vtx_perp = dist.perp();
-            float vtx_z = dist.z();
-            float vtx_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
+            float dv_z = dist.z();
+            float dv_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
             float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+            // define TLorentzVector of decay particles
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+            tlv_tp0 = tr1.p4();
+            tlv_tp1 = tr2.p4();
+            
+            // get R_cos
+            float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+            float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
+            float dv_Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
+
 
             // mass cut
             float mass_min = 10.;
+
+            if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) return;
 
             if(channel == "mumu") {
 
                 // cut flow flag
                 bool pass_vertex = true;
             
-                if (pass_vertex) m_mumu_cf_noflip->Fill("#mu#mu",1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("#mu#mu",1);
 
                 // place holder to match with main analysis
-                if (pass_vertex) m_mumu_cf_noflip->Fill("place holder",1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("place holder",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("#mu^{+}#mu^{-}", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("#mu^{+}#mu^{-}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto
-                m_mumu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                m_mumu_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_mumu_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_mumu_noflip_R->Fill(vtx_perp);
-                    m_mumu_noflip_z->Fill(vtx_z);
-                    m_mumu_noflip_M->Fill(dv_mass);
+                    m_mumu_nonflip_R->Fill(dv_R);
+                    m_mumu_nonflip_z->Fill(dv_z);
+                    m_mumu_nonflip_M->Fill(dv_mass);
+                    m_mumu_nonflip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_mumu_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_mumu_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
     
@@ -808,53 +843,54 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // cut flow flag
                 bool pass_vertex = true;
 
-                if (pass_vertex) m_emu_cf_noflip->Fill("e#mu",1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("e#mu",1);
 
                 // place holder to match with main analysis
-                if (pass_vertex) m_emu_cf_noflip->Fill("place holder",1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("place holder",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("e^{+/-}#mu^{-/+}", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("e^{+/-}#mu^{-/+}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
                 if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_emu_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_emu_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_emu_noflip_R->Fill(vtx_perp);
-                    m_emu_noflip_z->Fill(vtx_z);
-                    m_emu_noflip_M->Fill(dv_mass);
+                    m_emu_nonflip_R->Fill(dv_R);
+                    m_emu_nonflip_z->Fill(dv_z);
+                    m_emu_nonflip_M->Fill(dv_mass);
+                    m_emu_nonflip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_emu_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_emu_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
             }
@@ -863,53 +899,54 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // cut flow flag
                 bool pass_vertex = true;
 
-                if (pass_vertex) m_ee_cf_noflip->Fill("ee",1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("ee",1);
 
                 // place holder to match with main analysis
-                if (pass_vertex) m_ee_cf_noflip->Fill("place holder",1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("place holder",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("e^{+}e^{-}", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("e^{+}e^{-}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
                 if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_ee_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_ee_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_ee_noflip_R->Fill(vtx_perp);
-                    m_ee_noflip_z->Fill(vtx_z);
-                    m_ee_noflip_M->Fill(dv_mass);
+                    m_ee_nonflip_R->Fill(dv_R);
+                    m_ee_nonflip_z->Fill(dv_z);
+                    m_ee_nonflip_M->Fill(dv_mass);
+                    m_ee_nonflip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_ee_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_ee_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
             }
@@ -918,49 +955,56 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // cut flow flag
                 bool pass_vertex = true;
             
-                if (pass_vertex) m_idid_cf_noflip->Fill("xx",1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("xx",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("x^{+}x^{-}", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("x^{+}x^{-}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto (excl. mu)
                 if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_idid_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_idid_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // track z0 wrt beam pipe
+                if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
+                if (pass_vertex) m_idid_cf_nonflip->Fill("Track z_{0} > 10 mm (BP)", 1);
+
+
+
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_idid_noflip_R->Fill(vtx_perp);
-                    m_idid_noflip_z->Fill(vtx_z);
-                    m_idid_noflip_M->Fill(dv_mass);
-                    m_idid_noflip_l->Fill(vtx_l);
+                    m_idid_nonflip_R->Fill(dv_R);
+                    m_idid_nonflip_z->Fill(dv_z);
+                    m_idid_nonflip_M->Fill(dv_mass);
+                    m_idid_nonflip_l->Fill(dv_l);
 
                     // fill idid vertex vs track multiplicity
-                    m_idid_noflip_n_tracks->Fill(n_trk_sel);
+                    m_idid_nonflip_n_tracks->Fill(n_trk_sel);
 
                     // fill track parameters wrt SV
                     const Trk::Perigee* sv_perigee1 = m_trackToVertexTool->perigeeAtVertex(tr1, dv_pos);
@@ -991,59 +1035,59 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                     double tr2_z0_over_z0sigma_wrtSV   = tr2_z0_wrtSV / tr2_z0sigma_wrtSV;
 
                     // fill track parameters wrt SV
-                    m_track_noflip_d0_wrtSV->Fill (tr1_d0_wrtSV);
-                    m_track_noflip_z0_wrtSV->Fill (tr1_z0_wrtSV);
-                    m_track_noflip_phi_wrtSV->Fill(tr1_phi_wrtSV);
-                    m_track_noflip_theta_wrtSV->Fill(tr1_theta_wrtSV);
-                    m_track_noflip_p_wrtSV->Fill(tr1_p_wrtSV);
-                    m_track_noflip_pt_wrtSV->Fill(tr1_pt_wrtSV);
-                    m_track_noflip_d0sigma_wrtSV->Fill(tr1_d0sigma_wrtSV);
-                    m_track_noflip_z0sigma_wrtSV->Fill(tr1_z0sigma_wrtSV);
-                    m_track_noflip_d0_over_d0sigma_wrtSV->Fill(tr1_d0_over_d0sigma_wrtSV);
-                    m_track_noflip_z0_over_z0sigma_wrtSV->Fill(tr1_z0_over_z0sigma_wrtSV);
+                    m_track_nonflip_d0_wrtSV->Fill (tr1_d0_wrtSV);
+                    m_track_nonflip_z0_wrtSV->Fill (tr1_z0_wrtSV);
+                    m_track_nonflip_phi_wrtSV->Fill(tr1_phi_wrtSV);
+                    m_track_nonflip_theta_wrtSV->Fill(tr1_theta_wrtSV);
+                    m_track_nonflip_p_wrtSV->Fill(tr1_p_wrtSV);
+                    m_track_nonflip_pt_wrtSV->Fill(tr1_pt_wrtSV);
+                    m_track_nonflip_d0sigma_wrtSV->Fill(tr1_d0sigma_wrtSV);
+                    m_track_nonflip_z0sigma_wrtSV->Fill(tr1_z0sigma_wrtSV);
+                    m_track_nonflip_d0_over_d0sigma_wrtSV->Fill(tr1_d0_over_d0sigma_wrtSV);
+                    m_track_nonflip_z0_over_z0sigma_wrtSV->Fill(tr1_z0_over_z0sigma_wrtSV);
 
-                    m_track_noflip_d0_wrtSV->Fill (tr2_d0_wrtSV);
-                    m_track_noflip_z0_wrtSV->Fill (tr2_z0_wrtSV);
-                    m_track_noflip_phi_wrtSV->Fill(tr2_phi_wrtSV);
-                    m_track_noflip_theta_wrtSV->Fill(tr2_theta_wrtSV);
-                    m_track_noflip_p_wrtSV->Fill(tr2_p_wrtSV);
-                    m_track_noflip_pt_wrtSV->Fill(tr2_pt_wrtSV);
-                    m_track_noflip_d0sigma_wrtSV->Fill(tr2_d0sigma_wrtSV);
-                    m_track_noflip_z0sigma_wrtSV->Fill(tr2_z0sigma_wrtSV);
-                    m_track_noflip_d0_over_d0sigma_wrtSV->Fill(tr2_d0_over_d0sigma_wrtSV);
-                    m_track_noflip_z0_over_z0sigma_wrtSV->Fill(tr2_z0_over_z0sigma_wrtSV);
+                    m_track_nonflip_d0_wrtSV->Fill (tr2_d0_wrtSV);
+                    m_track_nonflip_z0_wrtSV->Fill (tr2_z0_wrtSV);
+                    m_track_nonflip_phi_wrtSV->Fill(tr2_phi_wrtSV);
+                    m_track_nonflip_theta_wrtSV->Fill(tr2_theta_wrtSV);
+                    m_track_nonflip_p_wrtSV->Fill(tr2_p_wrtSV);
+                    m_track_nonflip_pt_wrtSV->Fill(tr2_pt_wrtSV);
+                    m_track_nonflip_d0sigma_wrtSV->Fill(tr2_d0sigma_wrtSV);
+                    m_track_nonflip_z0sigma_wrtSV->Fill(tr2_z0sigma_wrtSV);
+                    m_track_nonflip_d0_over_d0sigma_wrtSV->Fill(tr2_d0_over_d0sigma_wrtSV);
+                    m_track_nonflip_z0_over_z0sigma_wrtSV->Fill(tr2_z0_over_z0sigma_wrtSV);
 
                     // fill track parameters wrt beam pipe
                     double tr1_p = 1.0 / fabs(tr1.qOverP()) / 1000.; // GeV
                     double tr1_pt = tr1_p * std::sin(tr1.theta());
                     double tr2_p = 1.0 / fabs(tr2.qOverP()) / 1000.; // GeV
                     double tr2_pt = tr2_p * std::sin(tr2.theta());
-                    m_track_noflip_d0->Fill(tr1.d0());
-                    m_track_noflip_z0->Fill(tr1.z0());
-                    m_track_noflip_phi->Fill(tr1.phi());
-                    m_track_noflip_theta->Fill(tr1.theta());
-                    m_track_noflip_p->Fill(tr1_p);
-                    m_track_noflip_pt->Fill(tr1_pt);
-                    m_track_noflip_d0sigma->Fill((tr1).definingParametersCovMatrixVec()[0]);
-                    m_track_noflip_z0sigma->Fill((tr1).definingParametersCovMatrixVec()[1]);
-                    m_track_noflip_d0_over_d0sigma->Fill((tr1).definingParameters()[0] / (tr1).definingParametersCovMatrixVec()[0]);
-                    m_track_noflip_z0_over_z0sigma->Fill((tr1).definingParameters()[1] / (tr1).definingParametersCovMatrixVec()[1]);
+                    m_track_nonflip_d0->Fill(tr1.d0());
+                    m_track_nonflip_z0->Fill(tr1.z0());
+                    m_track_nonflip_phi->Fill(tr1.phi());
+                    m_track_nonflip_theta->Fill(tr1.theta());
+                    m_track_nonflip_p->Fill(tr1_p);
+                    m_track_nonflip_pt->Fill(tr1_pt);
+                    m_track_nonflip_d0sigma->Fill((tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_nonflip_z0sigma->Fill((tr1).definingParametersCovMatrixVec()[1]);
+                    m_track_nonflip_d0_over_d0sigma->Fill((tr1).definingParameters()[0] / (tr1).definingParametersCovMatrixVec()[0]);
+                    m_track_nonflip_z0_over_z0sigma->Fill((tr1).definingParameters()[1] / (tr1).definingParametersCovMatrixVec()[1]);
 
-                    m_track_noflip_d0->Fill(tr2.d0());
-                    m_track_noflip_z0->Fill(tr2.z0());
-                    m_track_noflip_phi->Fill(tr2.phi());
-                    m_track_noflip_theta->Fill(tr2.theta());
-                    m_track_noflip_p->Fill(tr2_p);
-                    m_track_noflip_pt->Fill(tr2_pt);
-                    m_track_noflip_d0sigma->Fill((tr2).definingParametersCovMatrixVec()[0]);
-                    m_track_noflip_z0sigma->Fill((tr2).definingParametersCovMatrixVec()[1]);
-                    m_track_noflip_d0_over_d0sigma->Fill((tr2).definingParameters()[0] / (tr2).definingParametersCovMatrixVec()[0]);
-                    m_track_noflip_z0_over_z0sigma->Fill((tr2).definingParameters()[1] / (tr2).definingParametersCovMatrixVec()[1]);
+                    m_track_nonflip_d0->Fill(tr2.d0());
+                    m_track_nonflip_z0->Fill(tr2.z0());
+                    m_track_nonflip_phi->Fill(tr2.phi());
+                    m_track_nonflip_theta->Fill(tr2.theta());
+                    m_track_nonflip_p->Fill(tr2_p);
+                    m_track_nonflip_pt->Fill(tr2_pt);
+                    m_track_nonflip_d0sigma->Fill((tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_nonflip_z0sigma->Fill((tr2).definingParametersCovMatrixVec()[1]);
+                    m_track_nonflip_d0_over_d0sigma->Fill((tr2).definingParameters()[0] / (tr2).definingParametersCovMatrixVec()[0]);
+                    m_track_nonflip_z0_over_z0sigma->Fill((tr2).definingParameters()[1] / (tr2).definingParametersCovMatrixVec()[1]);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_idid_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_idid_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
     
@@ -1054,52 +1098,53 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // cut flow flag
                 bool pass_vertex = true;
             
-                if (pass_vertex) m_mut_cf_noflip->Fill("#mux",1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("#mux",1);
 
                 // place holder to match with main analysis
-                //m_mut_cf_noflip->Fill("place holder",1);
+                //m_mut_cf_nonflip->Fill("place holder",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("#mu^{+,-}x^{-,+}", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("#mu^{+,-}x^{-,+}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto
                 if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_mut_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_mut_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_mut_noflip_R->Fill(vtx_perp);
-                    m_mut_noflip_z->Fill(vtx_z);
+                    m_mut_nonflip_R->Fill(dv_R);
+                    m_mut_nonflip_z->Fill(dv_z);
+                    m_mut_nonflip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_mut_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_mut_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
     
@@ -1110,58 +1155,59 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // cut flow flag
                 bool pass_vertex = true;
             
-                if (pass_vertex) m_et_cf_noflip->Fill("ex",1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("ex",1);
 
                 // place holder to match with main analysis
-                //m_et_cf_noflip->Fill("place holder",1);
+                //m_et_cf_nonflip->Fill("place holder",1);
 
                 // vertex fit quality
                 if(!m_dvc->PassChisqCut(*fit)) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("#chi^{2}_{DV} / DOF < 5", 1);
 
                 // minimum distance from pv (from 0 for MC)
                 if(!m_dvc->PassDistCut(*fit, *pvc)) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("Disp. > 2 mm", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("Disp. > 2 mm", 1);
 
                 // charge requirements
                 if(!m_dvc->PassChargeRequirement(*fit)) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("e^{+,-}x^{-,+}", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("e^{+,-}x^{-,+}", 1);
 
                 // disabled module
                 if(!m_dvc->PassDisabledModuleVeto(*fit)) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("DisabledModule", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("DisabledModule", 1);
 
                 // material veto
                 if(!m_dvc->PassMaterialVeto(*fit)) pass_vertex = false;
-                if(pass_vertex) m_et_cf_noflip->Fill("MaterialVeto (excl. mu)", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("MaterialVeto (excl. mu)", 1);
 
                 // low mass veto
                 if(dv_mass < mass_min) pass_vertex = false;
-                if(pass_vertex) m_et_cf_noflip->Fill("LowMassVeto", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("LowMassVeto", 1);
 
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("R_{DV} > 300 mm", 1);
+                if (pass_vertex) m_et_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
-                if (pass_vertex) m_et_cf_noflip->Fill("z_{DV} > 300 mm", 1);
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
+                if (pass_vertex) m_et_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_et_noflip_R->Fill(vtx_perp);
-                    m_et_noflip_z->Fill(vtx_z);
+                    m_et_nonflip_R->Fill(dv_R);
+                    m_et_nonflip_z->Fill(dv_z);
+                    m_et_nonflip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
                         tru_matched = getClosestTruthVertex(fit);
-                        if(tru_matched) m_et_cf_noflip->Fill("Truth matched", 1);
+                        if(tru_matched) m_et_cf_nonflip->Fill("Truth matched", 1);
                     }
                 }
     
             }
         }
-        else n_refit_noflip_failed++;
+        else n_refit_nonflip_failed++;
     }
 
     return;
@@ -1198,13 +1244,23 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
 
             // get position of DV
             float dv_R = dist.perp();                 // R in [mm]
-            float dv_z = dist.z();                    // z in [mm]
+            float dv_z_abs = std::abs(dist.z());      // z in [mm]
    
             // position of vertex w.r.t. pv
-            float vtx_perp = dist.perp();
-            float vtx_z = dist.z();
-            float vtx_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
+            float dv_z = dist.z();
+            float dv_l = sqrt( dist.perp()*dist.perp() + dist.z()*dist.z() );
             float dv_mass = std::fabs(m_accMass(*fit)) / 1000.; // in MeV
+
+            // define TLorentzVector of decay particles
+            TLorentzVector tlv_tp0;
+            TLorentzVector tlv_tp1;
+            tlv_tp0 = tr1.p4();
+            tlv_tp1 = tr2.p4();
+            
+            // get R_cos
+            float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+            float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
+            float dv_Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
 
             // mass cut
             float mass_min = 10.;
@@ -1247,14 +1303,15 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_mumu_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_mumu_flip_R->Fill(vtx_perp);
-                    m_mumu_flip_z->Fill(vtx_z);
+                    m_mumu_flip_R->Fill(dv_R);
+                    m_mumu_flip_z->Fill(dv_z);
                     m_mumu_flip_M->Fill(dv_mass);
+                    m_mumu_flip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
@@ -1303,14 +1360,15 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_emu_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_emu_flip_R->Fill(vtx_perp);
-                    m_emu_flip_z->Fill(vtx_z);
+                    m_emu_flip_R->Fill(dv_R);
+                    m_emu_flip_z->Fill(dv_z);
                     m_emu_flip_M->Fill(dv_mass);
+                    m_emu_flip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
@@ -1358,14 +1416,15 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_ee_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_ee_flip_R->Fill(vtx_perp);
-                    m_ee_flip_z->Fill(vtx_z);
+                    m_ee_flip_R->Fill(dv_R);
+                    m_ee_flip_z->Fill(dv_z);
                     m_ee_flip_M->Fill(dv_mass);
+                    m_ee_flip_Rcos->Fill(dv_Rcos);
 
                     // truth match
                     if (isMC){
@@ -1410,28 +1469,24 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_idid_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
+                // track z0 wrt beam pipe
+                if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
+                if (pass_vertex) m_idid_cf_flip->Fill("Track z_{0} > 10 mm (BP)", 1);
 
 
                 // vertex distribution fill
                 if (pass_vertex) {
                     m_idid_flip_M->Fill(dv_mass);
-                    m_idid_flip_R->Fill(vtx_perp);
-                    m_idid_flip_z->Fill(vtx_z);
-                    m_idid_flip_l->Fill(vtx_l);
+                    m_idid_flip_R->Fill(dv_R);
+                    m_idid_flip_z->Fill(dv_z);
+                    m_idid_flip_l->Fill(dv_l);
                     m_idid_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
 
                     // fill idid vertex vs track multiplicity
                     m_idid_flip_n_tracks->Fill(n_trk_sel);
-
-                    // deltaR plot
-                    TLorentzVector tlv_tp0;
-                    TLorentzVector tlv_tp1;
-
-                    // define TLorentzVector of decay particles
-                    tlv_tp0 = tr1.p4();
-                    tlv_tp1 = tr2.p4();
 
                     float deltaR = tlv_tp0.DeltaR(tlv_tp1);
                     m_idid_flip_deltaR->Fill(deltaR);
@@ -1561,26 +1616,19 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_mut_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_mut_flip_R->Fill(vtx_perp);
-                    m_mut_flip_z->Fill(vtx_z);
-                    m_mut_flip_l->Fill(vtx_l);
+                    m_mut_flip_R->Fill(dv_R);
+                    m_mut_flip_z->Fill(dv_z);
+                    m_mut_flip_l->Fill(dv_l);
                     m_mut_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+                    m_mut_flip_Rcos->Fill(dv_Rcos);
 
                     // mass plot
                     m_mut_flip_M->Fill(dv_mass);
-
-                    // deltaR plot
-                    TLorentzVector tlv_tp0;
-                    TLorentzVector tlv_tp1;
-
-                    // define TLorentzVector of decay particles
-                    tlv_tp0 = tr1.p4();
-                    tlv_tp1 = tr2.p4();
 
                     float deltaR = tlv_tp0.DeltaR(tlv_tp1);
                     m_mut_flip_deltaR->Fill(deltaR);
@@ -1630,27 +1678,20 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if (pass_vertex) m_et_cf_flip->Fill("R_{DV} > 300 mm", 1);
 
                 // DV z <  300 mm
-                if(dv_z > dv_z_max) pass_vertex = false;
+                if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_et_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
 
                 // vertex distribution fill
                 if (pass_vertex) {
-                    m_et_flip_R->Fill(vtx_perp);
-                    m_et_flip_z->Fill(vtx_z);
-                    m_et_flip_l->Fill(vtx_l);
+                    m_et_flip_R->Fill(dv_R);
+                    m_et_flip_z->Fill(dv_z);
+                    m_et_flip_l->Fill(dv_l);
                     m_et_flip_chi2_ndof->Fill((*fit).chiSquared() / (*fit).numberDoF());
+                    m_et_flip_Rcos->Fill(dv_Rcos);
 
                     // mass plot
                     m_et_flip_M->Fill(dv_mass);
-
-                    // deltaR plot
-                    TLorentzVector tlv_tp0;
-                    TLorentzVector tlv_tp1;
-
-                    // define TLorentzVector of decay particles
-                    tlv_tp0 = tr1.p4();
-                    tlv_tp1 = tr2.p4();
 
                     float deltaR = tlv_tp0.DeltaR(tlv_tp1);
                     m_et_flip_deltaR->Fill(deltaR);
@@ -1675,7 +1716,7 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
 bool FlipBkgEst::PassCosmicVeto_R_CR(xAOD::TrackParticle& tr0, xAOD::TrackParticle& tr1){
 
     bool PassCosmicVeto = true;
-    float Rcos_min = 0.04;
+    float Rcos_min = 0.01;
 
     // define TLorentzVector of decay particles
     TLorentzVector tlv_tp0;
@@ -1747,32 +1788,32 @@ void FlipBkgEst::FillTrackPair(std::string channel){
     // fill track pair histogram
     if (channel == "mumu") {
         // count number of pairs
-        m_mumu_cf_noflip->Fill("#mu#mu pair",1);
+        m_mumu_cf_nonflip->Fill("#mu#mu pair",1);
         m_mumu_cf_flip->Fill("#mu#mu pair",1);
     }
     else if (channel =="ee") {
         // count number of pairs
-        m_ee_cf_noflip->Fill("ee pair",1);
+        m_ee_cf_nonflip->Fill("ee pair",1);
         m_ee_cf_flip->Fill("ee pair",1);
     }
     else if (channel =="emu") {
         // count number of pairs
-        m_emu_cf_noflip->Fill("e#mu pair",1);
+        m_emu_cf_nonflip->Fill("e#mu pair",1);
         m_emu_cf_flip->Fill("e#mu pair",1);
     }
     else if (channel =="mut") {
         // count number of pairs
-        m_mut_cf_noflip->Fill("#mux pair",1);
+        m_mut_cf_nonflip->Fill("#mux pair",1);
         m_mut_cf_flip->Fill("#mux pair",1);
     }
     else if (channel == "et") {
         // count number of pairs
-        m_et_cf_noflip->Fill("ex pair",1);
+        m_et_cf_nonflip->Fill("ex pair",1);
         m_et_cf_flip->Fill("ex pair",1);
     }
     else {
         // count number of pairs
-        m_idid_cf_noflip->Fill("xx pair",1);
+        m_idid_cf_nonflip->Fill("xx pair",1);
         m_idid_cf_flip->Fill("xx pair",1);
     }
 

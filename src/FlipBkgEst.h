@@ -108,51 +108,57 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         TH1D* m_n_elc_sel; //!
         TH1D* m_n_id_sel; //!
 
-        TH1D* m_mumu_cf_noflip; //!
+        TH1D* m_mumu_cf_nonflip; //!
         TH1D* m_mumu_cf_flip; //!
 
-        TH1D* m_ee_cf_noflip; //!
+        TH1D* m_ee_cf_nonflip; //!
         TH1D* m_ee_cf_flip; //!
 
-        TH1D* m_emu_cf_noflip; //!
+        TH1D* m_emu_cf_nonflip; //!
         TH1D* m_emu_cf_flip; //!
 
-        TH1D* m_idid_cf_noflip; //!
+        TH1D* m_idid_cf_nonflip; //!
         TH1D* m_idid_cf_flip; //!
 
-        TH1D* m_mut_cf_noflip; //!
+        TH1D* m_mut_cf_nonflip; //!
         TH1D* m_mut_cf_flip; //!
 
-        TH1D* m_et_cf_noflip; //!
+        TH1D* m_et_cf_nonflip; //!
         TH1D* m_et_cf_flip; //!
 
         // vertex distribution
-        TH1F* m_mumu_noflip_R; //!
-        TH1F* m_mumu_noflip_z; //!
-        TH1F* m_mumu_noflip_M; //!
+        TH1F* m_mumu_nonflip_R; //!
+        TH1F* m_mumu_nonflip_z; //!
+        TH1F* m_mumu_nonflip_M; //!
+        TH1F* m_mumu_nonflip_Rcos; //!
         TH1F* m_mumu_flip_R; //!
         TH1F* m_mumu_flip_z; //!
         TH1F* m_mumu_flip_M; //!
+        TH1F* m_mumu_flip_Rcos; //!
 
-        TH1F* m_ee_noflip_R; //!
-        TH1F* m_ee_noflip_z; //!
-        TH1F* m_ee_noflip_M; //!
+        TH1F* m_ee_nonflip_R; //!
+        TH1F* m_ee_nonflip_z; //!
+        TH1F* m_ee_nonflip_M; //!
+        TH1F* m_ee_nonflip_Rcos; //!
         TH1F* m_ee_flip_R; //!
         TH1F* m_ee_flip_z; //!
         TH1F* m_ee_flip_M; //!
+        TH1F* m_ee_flip_Rcos; //!
 
-        TH1F* m_emu_noflip_R; //!
-        TH1F* m_emu_noflip_z; //!
-        TH1F* m_emu_noflip_M; //!
+        TH1F* m_emu_nonflip_R; //!
+        TH1F* m_emu_nonflip_z; //!
+        TH1F* m_emu_nonflip_M; //!
+        TH1F* m_emu_nonflip_Rcos; //!
         TH1F* m_emu_flip_R; //!
         TH1F* m_emu_flip_z; //!
         TH1F* m_emu_flip_M; //!
+        TH1F* m_emu_flip_Rcos; //!
 
-        TH1F* m_idid_noflip_R; //!
-        TH1F* m_idid_noflip_z; //!
-        TH1F* m_idid_noflip_M; //!
-        TH1F* m_idid_noflip_l; //!
-        TH1F* m_idid_noflip_n_tracks; //!
+        TH1F* m_idid_nonflip_R; //!
+        TH1F* m_idid_nonflip_z; //!
+        TH1F* m_idid_nonflip_M; //!
+        TH1F* m_idid_nonflip_l; //!
+        TH1F* m_idid_nonflip_n_tracks; //!
 
         TH1F* m_idid_flip_R; //!
         TH1F* m_idid_flip_z; //!
@@ -162,46 +168,50 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         TH1F* m_idid_flip_chi2_ndof; //!
         TH1F* m_idid_flip_deltaR; //!
 
-        TH1F* m_mut_noflip_R; //!
-        TH1F* m_mut_noflip_z; //!
+        TH1F* m_mut_nonflip_R; //!
+        TH1F* m_mut_nonflip_z; //!
+        TH1F* m_mut_nonflip_Rcos; //!
         TH1F* m_mut_flip_R; //!
         TH1F* m_mut_flip_z; //!
         TH1F* m_mut_flip_M; //!
         TH1F* m_mut_flip_l; //!
+        TH1F* m_mut_flip_Rcos; //!
         TH1F* m_mut_flip_chi2_ndof; //!
         TH1F* m_mut_flip_deltaR; //!
 
-        TH1F* m_et_noflip_R; //!
-        TH1F* m_et_noflip_z; //!
+        TH1F* m_et_nonflip_R; //!
+        TH1F* m_et_nonflip_z; //!
+        TH1F* m_et_nonflip_Rcos; //!
         TH1F* m_et_flip_R; //!
         TH1F* m_et_flip_z; //!
         TH1F* m_et_flip_M; //!
         TH1F* m_et_flip_l; //!
+        TH1F* m_et_flip_Rcos; //!
         TH1F* m_et_flip_chi2_ndof; //!
         TH1F* m_et_flip_deltaR; //!
 
         // Track parameters
-        TH1F* m_track_noflip_p; //!
-        TH1F* m_track_noflip_pt; //!
-        TH1F* m_track_noflip_z0; //!
-        TH1F* m_track_noflip_d0; //!
-        TH1F* m_track_noflip_phi; //!
-        TH1F* m_track_noflip_theta; //!
-        TH1F* m_track_noflip_z0sigma; //!
-        TH1F* m_track_noflip_d0sigma; //!
-        TH1F* m_track_noflip_d0_over_d0sigma; //!
-        TH1F* m_track_noflip_z0_over_z0sigma; //!
+        TH1F* m_track_nonflip_p; //!
+        TH1F* m_track_nonflip_pt; //!
+        TH1F* m_track_nonflip_z0; //!
+        TH1F* m_track_nonflip_d0; //!
+        TH1F* m_track_nonflip_phi; //!
+        TH1F* m_track_nonflip_theta; //!
+        TH1F* m_track_nonflip_z0sigma; //!
+        TH1F* m_track_nonflip_d0sigma; //!
+        TH1F* m_track_nonflip_d0_over_d0sigma; //!
+        TH1F* m_track_nonflip_z0_over_z0sigma; //!
 
-        TH1F* m_track_noflip_p_wrtSV; //!
-        TH1F* m_track_noflip_pt_wrtSV; //!
-        TH1F* m_track_noflip_z0_wrtSV; //!
-        TH1F* m_track_noflip_d0_wrtSV; //!
-        TH1F* m_track_noflip_phi_wrtSV; //!
-        TH1F* m_track_noflip_theta_wrtSV; //!
-        TH1F* m_track_noflip_z0sigma_wrtSV; //!
-        TH1F* m_track_noflip_d0sigma_wrtSV; //!
-        TH1F* m_track_noflip_d0_over_d0sigma_wrtSV; //!
-        TH1F* m_track_noflip_z0_over_z0sigma_wrtSV; //!
+        TH1F* m_track_nonflip_p_wrtSV; //!
+        TH1F* m_track_nonflip_pt_wrtSV; //!
+        TH1F* m_track_nonflip_z0_wrtSV; //!
+        TH1F* m_track_nonflip_d0_wrtSV; //!
+        TH1F* m_track_nonflip_phi_wrtSV; //!
+        TH1F* m_track_nonflip_theta_wrtSV; //!
+        TH1F* m_track_nonflip_z0sigma_wrtSV; //!
+        TH1F* m_track_nonflip_d0sigma_wrtSV; //!
+        TH1F* m_track_nonflip_d0_over_d0sigma_wrtSV; //!
+        TH1F* m_track_nonflip_z0_over_z0sigma_wrtSV; //!
 
         TH1F* m_track_flip_p; //!
         TH1F* m_track_flip_pt; //!
@@ -252,8 +262,8 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         std::vector<const Trk::Perigee*> m_perigees;
 
         // counting vertex failed on refitting
-        int n_refit_noflip_failed = 0;
-        int n_refit_noflip_succeeded = 0;
+        int n_refit_nonflip_failed = 0;
+        int n_refit_nonflip_succeeded = 0;
         int n_refit_flip_failed = 0;
         int n_refit_flip_succeeded = 0;
 }; 

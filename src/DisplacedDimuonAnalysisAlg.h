@@ -46,7 +46,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
-        virtual bool PassCosmicVeto(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
+        virtual void plot_cosmic(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         virtual void plot_signal_tp(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel);
 
@@ -204,6 +204,11 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_mut_l; //!
             TH1F* m_dv_mut_chi2_ndof; //!
             TH1F* m_dv_mut_deltaR; //!
+            TH1F* m_dv_mut_DeltaR; //!
+            TH1F* m_dv_mut_DeltaR_low; //!
+            TH1F* m_dv_mut_Rcos; //!
+            TH1F* m_dv_mut_Rcos_low; //!
+
 
             TH1D* m_dv_et_cf; //!
             TH1F* m_dv_et_M; //!
@@ -212,6 +217,10 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
             TH1F* m_dv_et_l; //!
             TH1F* m_dv_et_chi2_ndof; //!
             TH1F* m_dv_et_deltaR; //!
+            TH1F* m_dv_et_DeltaR; //!
+            TH1F* m_dv_et_DeltaR_low; //!
+            TH1F* m_dv_et_Rcos; //!
+            TH1F* m_dv_et_Rcos_low; //!
 
         //----------------------------------
         // trk-trk plots
