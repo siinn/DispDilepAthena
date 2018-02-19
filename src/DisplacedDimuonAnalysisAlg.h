@@ -23,6 +23,7 @@
 #include "DispDilepAthena/DVUtils.h"
 #include "DispDilepAthena/LeptonSelectionTools.h"
 #include "DispDilepAthena/CosmicTools.h"
+#include "DispDilepAthena/FilterMatchingTools.h"
 
 // GRL
 #include "GoodRunsLists/IGoodRunsListSelectionTool.h"
@@ -70,6 +71,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
         ToolHandle<DDL::IPhotonMatch> m_phmatch;
+        ToolHandle<IFilterMatchingTools> m_fmtool; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;

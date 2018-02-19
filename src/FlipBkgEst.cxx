@@ -49,7 +49,11 @@ m_vertexer("DDL::DispVertexer/DispVertexer"),
 m_acc_p4("DDL_p4"),
 m_accMass("mass"),
 m_trackToVertexTool("Reco::TrackToVertex"),
-m_fitsvc("Trk::TrkVKalVrtFitter/VxFitter")
+m_fitsvc("Trk::TrkVKalVrtFitter/VxFitter"),
+m_acc_type("DDL_TrackType"),
+m_filters("DDL::DESDFilters/DESDFilters"),
+m_phmatch("DDL::PhotonMatch/PhotonMatch"),
+m_fmtool("FilterMatchingTools")
 {
     // initialize tools
     declareProperty("DiLepDVCuts", m_dilepdvc);
@@ -67,6 +71,9 @@ m_fitsvc("Trk::TrkVKalVrtFitter/VxFitter")
     declareProperty("Vertexer", m_vertexer);
     declareProperty ("TrackToVertexTool", m_trackToVertexTool);
     declareProperty ("TrkVKalVrtFitter", m_fitsvc);
+    declareProperty ("DESDFilters", m_filters);
+    declareProperty ("PhotonMatch", m_phmatch);
+    declareProperty("FilterMatchingTool", m_fmtool);
 }
 
 
@@ -103,67 +110,67 @@ StatusCode FlipBkgEst::initialize() {
     m_et_cf_nonflip = new TH1D( "m_et_cf_nonflip", "et cutflow (no flip)", 10,0,10);
     m_et_cf_flip = new TH1D( "m_et_cf_flip", "et cutflow (flip)", 10,0,10);
 
-    m_mumu_nonflip_R = new TH1F( "m_mumu_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_mumu_nonflip_R = new TH1F( "m_mumu_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_mumu_nonflip_z = new TH1F( "m_mumu_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_mumu_nonflip_M = new TH1F( "m_mumu_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_mumu_nonflip_M = new TH1F( "m_mumu_nonflip_M", "vertex M (no flip)", 2000,0,2000);
     m_mumu_nonflip_Rcos = new TH1F( "m_mumu_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 200,0,600);
+    m_mumu_flip_R = new TH1F( "m_mumu_flip_R", "vertex R (flip)", 600,0,600);
     m_mumu_flip_z = new TH1F( "m_mumu_flip_z", "vertex z (flip)", 1000,-1000,1000);
-    m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_mumu_flip_M = new TH1F( "m_mumu_flip_M", "vertex M (flip)", 2000,0,2000);
     m_mumu_flip_Rcos = new TH1F( "m_mumu_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_ee_nonflip_R = new TH1F( "m_ee_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_ee_nonflip_R = new TH1F( "m_ee_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_ee_nonflip_z = new TH1F( "m_ee_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_ee_nonflip_M = new TH1F( "m_ee_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_ee_nonflip_M = new TH1F( "m_ee_nonflip_M", "vertex M (no flip)", 2000,0,2000);
     m_ee_nonflip_Rcos = new TH1F( "m_ee_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 200,0,600);
+    m_ee_flip_R = new TH1F( "m_ee_flip_R", "vertex R (flip)", 600,0,600);
     m_ee_flip_z = new TH1F( "m_ee_flip_z", "vertex z (flip)", 1000,-1000,1000);
-    m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_ee_flip_M = new TH1F( "m_ee_flip_M", "vertex M (flip)", 2000,0,2000);
     m_ee_flip_Rcos = new TH1F( "m_ee_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_emu_nonflip_R = new TH1F( "m_emu_nonflip_R", "vertex R (no flip)", 200,0,600);
+    m_emu_nonflip_R = new TH1F( "m_emu_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_emu_nonflip_z = new TH1F( "m_emu_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
-    m_emu_nonflip_M = new TH1F( "m_emu_nonflip_M", "vertex M (no flip)", 1000,0,1000);
+    m_emu_nonflip_M = new TH1F( "m_emu_nonflip_M", "vertex M (no flip)", 2000,0,2000);
     m_emu_nonflip_Rcos = new TH1F( "m_emu_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 200,0,600);
+    m_emu_flip_R = new TH1F( "m_emu_flip_R", "vertex R (flip)", 600,0,600);
     m_emu_flip_z = new TH1F( "m_emu_flip_z", "vertex z (flip)", 1000,-1000,1000);
-    m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 1000,0,1000);
+    m_emu_flip_M = new TH1F( "m_emu_flip_M", "vertex M (flip)", 2000,0,2000);
     m_emu_flip_Rcos = new TH1F( "m_emu_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
 
-    m_idid_nonflip_M = new TH1F( "m_idid_nonflip_M", "mass in GeV", 1000, 0, 1000);
+    m_idid_nonflip_M = new TH1F( "m_idid_nonflip_M", "mass in GeV", 2000,0,2000);
     m_idid_nonflip_R = new TH1F( "m_idid_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_idid_nonflip_z = new TH1F( "m_idid_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
     m_idid_nonflip_l = new TH1F( "m_idid_nonflip_l", "vertex l (no flip)", 100, 0, 1000.);
     m_idid_nonflip_n_tracks = new TH1F( "m_idid_nonflip_n_tracks", "vertex vs track multiplicity (nonflip)", 500,0,500);
 
-    m_idid_flip_M = new TH1F("m_idid_flip_M","mass in GeV", 1000, 0, 1000. );
+    m_idid_flip_M = new TH1F("m_idid_flip_M","mass in GeV", 2000,0,2000. );
     m_idid_flip_R = new TH1F( "m_idid_flip_R", "vertex R (flip)", 600,0,600);
     m_idid_flip_z = new TH1F( "m_idid_flip_z", "vertex z (flip)", 1000,-1000,1000);
     m_idid_flip_l = new TH1F("m_idid_flip_l","vertex l (flip)", 100, 0, 1000.);
     m_idid_flip_n_tracks = new TH1F( "m_idid_flip_n_tracks", "vertex vs track multiplicity (flip)", 500,0,500);
-    m_idid_flip_deltaR = new TH1F( "m_idid_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
+    m_idid_flip_deltaR = new TH1F( "m_idid_flip_deltaR", "vertex deltaR (flip)", 100,0.,5.);
     m_idid_flip_chi2_ndof = new TH1F("m_idid_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
     m_mut_nonflip_R = new TH1F( "m_mut_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_mut_nonflip_z = new TH1F( "m_mut_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
     m_mut_nonflip_Rcos = new TH1F( "m_mut_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_mut_flip_M = new TH1F("m_mut_flip_M","DV mass in GeV", 1000, 0, 1000. );
+    m_mut_flip_M = new TH1F("m_mut_flip_M","DV mass in GeV", 2000,0,2000. );
     m_mut_flip_R = new TH1F( "m_mut_flip_R", "vertex R (flip)", 600,0,600);
     m_mut_flip_z = new TH1F( "m_mut_flip_z", "vertex z (flip)", 1000,-1000,1000);
-    m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 100, 0, 2000.);
+    m_mut_flip_l = new TH1F("m_mut_flip_l","vertex l (flip)", 100, 0, 1000.);
     m_mut_flip_Rcos = new TH1F( "m_mut_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_mut_flip_deltaR = new TH1F( "m_mut_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
+    m_mut_flip_deltaR = new TH1F( "m_mut_flip_deltaR", "vertex deltaR (flip)", 100,0.,5.);
     m_mut_flip_chi2_ndof = new TH1F("m_mut_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
     m_et_nonflip_R = new TH1F( "m_et_nonflip_R", "vertex R (no flip)", 600,0,600);
     m_et_nonflip_z = new TH1F( "m_et_nonflip_z", "vertex z (no flip)", 1000,-1000,1000);
     m_et_nonflip_Rcos = new TH1F( "m_et_nonflip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_et_flip_M = new TH1F("m_et_flip_M","DV mass in GeV", 1000, 0, 1000. );
+    m_et_flip_M = new TH1F("m_et_flip_M","DV mass in GeV", 2000,0,2000. );
     m_et_flip_R = new TH1F( "m_et_flip_R", "vertex R (flip)", 600,0,600);
     m_et_flip_z = new TH1F( "m_et_flip_z", "vertex z (flip)", 1000,-1000,1000);
-    m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 100, 0, 2000.);
+    m_et_flip_l = new TH1F("m_et_flip_l","vertex l (flip)", 100, 0, 1000.);
     m_et_flip_Rcos = new TH1F( "m_et_flip_Rcos", "vertex Rcos (no flip)", 5000, 0, 5);
-    m_et_flip_deltaR = new TH1F( "m_et_flip_deltaR", "vertex deltaR (flip)", 20,0.,2.);
+    m_et_flip_deltaR = new TH1F( "m_et_flip_deltaR", "vertex deltaR (flip)", 100,0.,5.);
     m_et_flip_chi2_ndof = new TH1F("m_et_flip_chi2_ndof","chi2 / ndof", 200,0.,50 );
 
     // Track parameters
@@ -402,6 +409,9 @@ StatusCode FlipBkgEst::execute() {
     const xAOD::ElectronContainer* elc = nullptr;
     CHECK( evtStore()->retrieve( elc, "Electrons" ));
 
+    const xAOD::PhotonContainer* phc = nullptr;
+    CHECK( evtStore()->retrieve( phc, "Photons" ));
+
     //const xAOD::TrackParticleContainer* vsc = nullptr;
     //CHECK( evtStore()->retrieve( vsc, "VrtSecInclusive_SelectedTrackParticles" ));
 
@@ -427,6 +437,9 @@ StatusCode FlipBkgEst::execute() {
 
     // apply overlap removal
     m_or->FindOverlap(*elc_copy.first, *muc_copy.first);
+
+    // perform photon to electron matching
+    //m_phmatch->MatchPhotons(*phc, *elc_copy.first);
 
 
     //---------------------------------------
@@ -492,10 +505,24 @@ StatusCode FlipBkgEst::execute() {
         mu_tr->auxdecor<int>("muon") = 1;
         ATH_MSG_DEBUG("DEBUG: Found muon, ptr = " << mu_tr);
 
+        // good so far
+
+        // copy ID track
+        xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
+        id_sel->push_back(tr_ptr);
+        xAOD::safeDeepCopy(*mu_tr, *tr_ptr);
+
+        // decorate ID track with type (needed for filters)
+        m_acc_type(*tr_ptr) = DDL::MUTR;
+
+        // decorate ID track with filter information
+        m_filters->Decorate(*mu, *tr_ptr);
+
         // count selected muon
         n_mu_sel++;
 
     }
+
 
     for(auto el: *elc_copy.first) {
         // overlap removal
@@ -524,12 +551,39 @@ StatusCode FlipBkgEst::execute() {
         el_tr->auxdecor<int>("electron") = 1;
         ATH_MSG_DEBUG("DEBUG: Found electron, ptr = " << el_tr);
 
+        // copy ID track
+        xAOD::TrackParticle* tr_ptr = new xAOD::TrackParticle();
+        id_sel->push_back(tr_ptr);
+        xAOD::safeDeepCopy(*el_tr, *tr_ptr);
+
+        // decorate ID track with type (needed for filters)
+        m_acc_type(*tr_ptr) = DDL::ELTR;
+
+        // decorate ID track with filter information
+        m_filters->Decorate(*el, *tr_ptr);
+
         // count selected electron
         n_el_sel++;
 
     }
 
     for(auto id_tr: *idc_copy.first) {
+
+        // lepton flag
+        bool isLepton = false;
+
+        // get original track
+        auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*id_tr));
+        if (orig_tr == nullptr) orig_tr = id_tr;
+
+        // check if this ID track is a lepton
+        if((orig_tr)->auxdecor<int>("electron") or (orig_tr)->auxdecor<int>("muon")) {
+            isLepton = true;
+        }
+        if (isLepton) continue;
+
+        // count non-leptonic selected track
+        n_trk_sel++;
 
         // track quality requirement
         if(!m_vertexer->GoodTrack(*id_tr)) continue;
@@ -548,31 +602,18 @@ StatusCode FlipBkgEst::execute() {
         id_sel->push_back(tr_ptr);
         xAOD::safeDeepCopy(*id_tr, *tr_ptr);
 
+        // decorate ID track with type (needed for filters)
+        m_acc_type(*tr_ptr) = DDL::NLTR;
+
+        // decorate ID track with dummy filter information (needed for seed calculation)
+        m_filters->Decorate(*tr_ptr);
+
         // decorate track with flipping status
         tr_ptr->auxdecor<std::string>("Flip") = "new";
 
-        // lepton flag
-        bool isLepton = false;
-
-        // get original track
-        auto orig_tr = dynamic_cast<const xAOD::TrackParticle*>(xAOD::getOriginalObject(*id_tr));
-        if (orig_tr == nullptr) orig_tr = id_tr;
-
-        ATH_MSG_DEBUG("DEBUG: current orig_tr ptr = " << orig_tr);
-        ATH_MSG_DEBUG("DEBUG: current id_tr ptr = " << orig_tr);
-
-        // check if this ID track is a lepton
-        if((orig_tr)->auxdecor<int>("electron") or (orig_tr)->auxdecor<int>("muon")) {
-            isLepton = true;
-            ATH_MSG_DEBUG("DEBUG: found electron or muon from orig_tr");
-        }
-
-        // count non-leptonic selected track
-        if (!isLepton) {
-            n_trk_sel++;
-        }
 
     }
+
 
     // Fill selected leptons
     m_n_mu_sel->Fill(n_mu_sel);
@@ -617,9 +658,9 @@ StatusCode FlipBkgEst::execute() {
                 if((orig_tr1)->auxdecor<int>("muon")) n_mu++;
                 if((orig_tr2)->auxdecor<int>("muon")) n_mu++;
 
-                ATH_MSG_DEBUG("DEBUG: New pair ==========================");
-                ATH_MSG_DEBUG("DEBUG: \tn_elc = " << n_elc);
-                ATH_MSG_DEBUG("DEBUG: \tn_mu = " << n_mu);
+                ATH_MSG_INFO("DEBUG: New pair ==========================");
+                ATH_MSG_INFO("DEBUG: \tn_elc = " << n_elc);
+                ATH_MSG_INFO("DEBUG: \tn_mu = " << n_mu);
 
                 // find vertex type
                 std::string channel = FindDecayChannel(n_mu, n_elc);
@@ -714,10 +755,6 @@ StatusCode FlipBkgEst::execute() {
     delete elc_copy.second;
     delete muc_copy.first;
     delete muc_copy.second;
-    //delete el_sel;
-    //delete el_sel_aux;
-    //delete mu_sel;
-    //delete mu_sel_aux;
 
     return StatusCode::SUCCESS;
 }
@@ -780,7 +817,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
             // mass cut
             float mass_min = 10.;
 
-            if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) return;
+            // blind signal region
+            if(!isMC){
+                if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) return;
+            }
 
             if(channel == "mumu") {
 
@@ -815,6 +855,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -822,6 +866,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_mumu_cf_nonflip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -872,6 +920,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -879,6 +931,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_emu_cf_nonflip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -928,6 +984,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -935,6 +995,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_ee_cf_nonflip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -981,6 +1045,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -989,9 +1057,14 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
 
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_nonflip->Fill("FilterMatching", 1);
+
+
                 // track z0 wrt beam pipe
-                if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
-                if (pass_vertex) m_idid_cf_nonflip->Fill("Track z_{0} > 10 mm (BP)", 1);
+                //if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
+                //if (pass_vertex) m_idid_cf_nonflip->Fill("Track z_{0} > 10 mm (BP)", 1);
 
 
 
@@ -1127,6 +1200,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -1134,6 +1211,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_nonflip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1184,6 +1265,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_et_cf_nonflip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_nonflip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_et_cf_nonflip->Fill("R_{DV} > 300 mm", 1);
@@ -1191,6 +1276,10 @@ void FlipBkgEst::PerformFit(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_et_cf_nonflip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_nonflip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1262,6 +1351,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
             float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
             float dv_Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
 
+            // RPVLL filter matching status
+            bool FilterMatching = false;
+            //if(m_filters->PassAny(tr1, tr2)) FilterMatching = true;
+
             // mass cut
             float mass_min = 10.;
 
@@ -1298,6 +1391,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1305,6 +1402,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mumu_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_mumu_cf_flip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1355,6 +1456,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1362,6 +1467,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_emu_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_emu_cf_flip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1411,6 +1520,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1418,6 +1531,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_ee_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_filters->PassAny(tr1, tr2)) pass_vertex  = false;
+                if (pass_vertex) m_ee_cf_flip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1464,6 +1581,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1472,9 +1593,13 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_idid_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_idid_cf_flip->Fill("FilterMatching", 1);
+
                 // track z0 wrt beam pipe
-                if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
-                if (pass_vertex) m_idid_cf_flip->Fill("Track z_{0} > 10 mm (BP)", 1);
+                //if(std::abs((tr1.z0()) < 10) or (std::abs(tr2.z0()) < 10)) pass_vertex = false;;
+                //if (pass_vertex) m_idid_cf_flip->Fill("Track z_{0} > 10 mm (BP)", 1);
 
 
                 // vertex distribution fill
@@ -1611,6 +1736,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1618,6 +1747,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 // DV z <  300 mm
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_mut_cf_flip->Fill("z_{DV} > 300 mm", 1);
+
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_mut_cf_flip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {
@@ -1673,6 +1806,10 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_mass < mass_min) pass_vertex = false;
                 if (pass_vertex) m_et_cf_flip->Fill("LowMassVeto", 1);
 
+                // cosmic veto
+                if(!PassCosmicVeto_R_CR(tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("CosmicVeto", 1);
+
                 // DV R <  300 mm
                 if(dv_R > dv_R_max) pass_vertex = false;
                 if (pass_vertex) m_et_cf_flip->Fill("R_{DV} > 300 mm", 1);
@@ -1681,6 +1818,9 @@ void FlipBkgEst::PerformFit_flip(xAOD::TrackParticle& tr1, xAOD::TrackParticle& 
                 if(dv_z_abs > dv_z_max) pass_vertex = false;
                 if (pass_vertex) m_et_cf_flip->Fill("z_{DV} > 300 mm", 1);
 
+                // Filter matching
+                if(!m_fmtool->PassFilter(channel, tr1, tr2)) pass_vertex = false;
+                if (pass_vertex) m_et_cf_flip->Fill("FilterMatching", 1);
 
                 // vertex distribution fill
                 if (pass_vertex) {

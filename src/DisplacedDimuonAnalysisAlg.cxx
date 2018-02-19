@@ -45,6 +45,7 @@ m_accEl("DDL_Electrons"),
 m_cos("DDL::DiLepCosmics/DiLepCosmics"),
 m_phmatch("DDL::PhotonMatch/PhotonMatch"),
 m_trackToVertexTool("Reco::TrackToVertex"),
+m_fmtool("FilterMatchingTools"),
 m_accMass("mass")
 {
     // initialize tools
@@ -61,6 +62,7 @@ m_accMass("mass")
     declareProperty("DiLepDVCuts", m_dilepdvc);
     declareProperty("PhotonMatch", m_phmatch);
     declareProperty ("TrackToVertexTool", m_trackToVertexTool);
+    declareProperty("FilterMatchingTool", m_fmtool);
 
 
 }
@@ -83,9 +85,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_mumu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 9,0,9);
+    m_dv_mumu_cf = new TH1D( "m_dv_mumu_cf", "Reco dv mumu cutflow", 13,0,13);
     m_dv_mumu_M = new TH1F("dv_mumu_M","Dimuon DV mass in GeV", 2000,0,2000 );
-    m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",50,0.,300.);
+    m_dv_mumu_R = new TH1F("dv_mumu_R","R of dimuon dv [mm]",600,0,600);
     m_dv_mumu_R_low = new TH1F("dv_mumu_R_low","R of dimuon dv [mm], low",50,0.,50.);
     m_dv_mumu_z = new TH1F("dv_mumu_z","z of dimuon dv [mm]",1000,-1000.,1000.);
     m_dv_mumu_l = new TH1F("dv_mumu_l","l of dimuon dv [mm]",100,0.,1000.);
@@ -102,15 +104,15 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // cosmic veto
     m_dv_mumu_DeltaR = new TH1F("dv_mumu_DeltaR","Signal muon Delta R",100, 0., 5.);
     m_dv_mumu_DeltaR_low = new TH1F("dv_mumu_DeltaR_low","Signal muon Delta R low",60, 0., 1);
-    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",50, 0., 5.);
+    m_dv_mumu_Rcos = new TH1F("dv_mumu_Rcos","Signal muon Rcos",5000, 0, 5);
     m_dv_mumu_Rcos_low = new TH1F("dv_mumu_Rcos_low","Signal muon Rcos low",1000, 0., 0.1);
     m_dv_mumu_DeltaR_Rcos = new TH2F("dv_mumu_DeltaR_Rcos","#DeltaR vs R_{CR}", 100,0,5,100,0,5);
 
     // only for MC
     m_dv_mumu_M_matched = new TH1F("dv_mumu_M_matched","matched dimuon DV mass in GeV",200,0.,2000.);
-    m_dv_mumu_R_matched = new TH1F("dv_mumu_R_matched","R of matched dimuon dv [mm]",50,0.,300.);
+    m_dv_mumu_R_matched = new TH1F("dv_mumu_R_matched","R of matched dimuon dv [mm]",600,0,600);
     m_dv_mumu_R_M_matched = new TH2F("dv_mumu_R_M_matched","matched dimuon DV position R vs M", 50,0,300,100,0,1000);
-    m_dv_mumu_chi2_ndof = new TH1F("dv_mumu_chi2_ndof", "chi^2 / ndof (mumu)", 100, 0, 10);
+    m_dv_mumu_chi2_ndof = new TH1F("dv_mumu_chi2_ndof", "chi^2 / ndof (mumu)", 200, 0, 50);
     m_dv_mumu_eta_matched = new TH1F("dv_mumu_eta_matched","eta of dimuon dv",40,-4.,4.);
 
     // registor for output
@@ -149,9 +151,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_ee_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 9,0,9);
-    m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",1000, 0, 1000);
-    m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",50,0.,300.);
+    m_dv_ee_cf = new TH1D( "m_dv_ee_cf", "Reco dv ee cutflow", 13,0,13);
+    m_dv_ee_M = new TH1F("dv_ee_M","ee DV mass in GeV",2000,0,2000);
+    m_dv_ee_R = new TH1F("dv_ee_R","R of ee dv [mm]",600,0,600);
     m_dv_ee_R_low = new TH1F("dv_ee_R_low","R of ee dv [mm], low",50,0.,50.);
     m_dv_ee_z = new TH1F("dv_ee_z","z of ee dv [mm]",1000,-1000.,1000.);
     m_dv_ee_l = new TH1F("dv_ee_l","l of ee dv [mm]",100,0.,1000.);
@@ -168,12 +170,12 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // cosmic veto
     m_dv_ee_DeltaR = new TH1F("dv_ee_DeltaR","Signal ee Delta R",100, 0., 5.);
     m_dv_ee_DeltaR_low = new TH1F("dv_ee_DeltaR_low","Signal ee Delta R low",100, 0., 1);
-    m_dv_ee_Rcos = new TH1F("dv_ee_Rcos","Signal ee Rcos",50, 0., 5.);
+    m_dv_ee_Rcos = new TH1F("dv_ee_Rcos","Signal ee Rcos",5000, 0, 5);
     m_dv_ee_Rcos_low = new TH1F("dv_ee_Rcos_low","Signal ee Rcos low",100, 0., 0.1);
 
     // only for MC
     m_dv_ee_M_matched = new TH1F("dv_ee_M_matched","matched ee DV mass in GeV",200,0.,2000.);
-    m_dv_ee_R_matched = new TH1F("dv_ee_R_matched","R of matched ee dv [mm]",50,0.,300.);
+    m_dv_ee_R_matched = new TH1F("dv_ee_R_matched","R of matched ee dv [mm]",600,0,600);
     m_dv_ee_R_M_matched = new TH2F("dv_ee_R_M_matched","matched ee DV position R vs M", 50,0,300,100,0,1000);
     m_dv_ee_eta_matched = new TH1F("dv_ee_eta_matched","eta of ee dv",100,-4.,4.);
     m_dv_ee_chi2_ndof = new TH1F("dv_ee_chi2_ndof", "chi^2 / ndof (ee)", 100, 0, 10);
@@ -213,9 +215,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
 
     //Float_t m_dv_emu_M_bins[] = {0,10,40,70,100,400,700,1000,2000};
-    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 9,0,9);
+    m_dv_emu_cf = new TH1D( "m_dv_emu_cf", "Reco dv emu cutflow", 13,0,13);
     m_dv_emu_M = new TH1F("dv_emu_M","emu DV mass in GeV",1000,0,1000);
-    m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",50,0.,300.);
+    m_dv_emu_R = new TH1F("dv_emu_R","R of emu dv [mm]",600,0,600);
     m_dv_emu_R_low = new TH1F("dv_emu_R_low","R of emu dv [mm], low",50,0.,50.);
     m_dv_emu_z = new TH1F("dv_emu_z","z of emu dv [mm]",1000,-1000.,1000.);
     m_dv_emu_l = new TH1F("dv_emu_l","l of emu dv [mm]",100,0.,1000.);
@@ -239,12 +241,12 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // cosmic veto
     m_dv_emu_DeltaR = new TH1F("dv_emu_DeltaR","Signal emu Delta R",100, 0., 5.);
     m_dv_emu_DeltaR_low = new TH1F("dv_emu_DeltaR_low","Signal emu Delta R low",100, 0., 1);
-    m_dv_emu_Rcos = new TH1F("dv_emu_Rcos","Signal emu Rcos",50, 0., 5.);
+    m_dv_emu_Rcos = new TH1F("dv_emu_Rcos","Signal emu Rcos",5000, 0, 5);
     m_dv_emu_Rcos_low = new TH1F("dv_emu_Rcos_low","Signal emu Rcos low",100, 0., 0.1);
 
     // only for MC
     m_dv_emu_M_matched = new TH1F("dv_emu_M_matched","matched emu DV mass in GeV",200,0.,2000.);
-    m_dv_emu_R_matched = new TH1F("dv_emu_R_matched","R of matched emu dv [mm]",50,0.,300.);
+    m_dv_emu_R_matched = new TH1F("dv_emu_R_matched","R of matched emu dv [mm]",600,0,600);
     m_dv_emu_R_M_matched = new TH2F("dv_emu_R_M_matched","matched emu DV position R vs M", 50,0,300,100,0,1000);
     m_dv_emu_eta_matched = new TH1F("dv_emu_eta_matched","eta of emu dv",100,-4.,4.);
     m_dv_emu_chi2_ndof = new TH1F("dv_emu_chi2_ndof", "chi^2 / ndof (emu)", 100, 0, 10);
@@ -290,29 +292,29 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // e+track, mu+track
     //--------------------------------------------------------
-    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 8,0,8);
-    m_dv_mut_M = new TH1F("dv_mut_M","DV mass in GeV", 1000, 0, 1000. );
-    m_dv_mut_R = new TH1F("dv_mut_R","R [mm]", 300, 0, 300. );
+    m_dv_mut_cf = new TH1D( "m_dv_mut_cf", "Reco dv mut cutflow", 12,0,12);
+    m_dv_mut_M = new TH1F("dv_mut_M","DV mass in GeV", 2000,0,2000. );
+    m_dv_mut_R = new TH1F("dv_mut_R","R [mm]", 600,0,600 );
     m_dv_mut_z = new TH1F("dv_mut_z","z [mm]", 1000, -1000., 1000.);
     m_dv_mut_deltaR = new TH1F("dv_mut_deltaR","deltaR", 20, 0., 2.);
-    m_dv_mut_l = new TH1F("dv_mut_l","l [mm]", 20, 0., 1000.);
+    m_dv_mut_l = new TH1F("dv_mut_l","l [mm]", 100, 0., 1000.);
     m_dv_mut_chi2_ndof = new TH1F("dv_mut_chi2_ndof","chi^2 / ndof", 200,0.,50);
     m_dv_mut_DeltaR = new TH1F("dv_mut_DeltaR","Signal mut Delta R",100, 0., 5.);
     m_dv_mut_DeltaR_low = new TH1F("dv_mut_DeltaR_low","Signal mut Delta R low",100, 0., 1);
-    m_dv_mut_Rcos = new TH1F("dv_mut_Rcos","Signal mut Rcos",50, 0., 5.);
+    m_dv_mut_Rcos = new TH1F("dv_mut_Rcos","Signal mut Rcos",5000, 0, 5);
     m_dv_mut_Rcos_low = new TH1F("dv_mut_Rcos_low","Signal mut Rcos low",100, 0., 0.1);
 
 
-    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 8,0,8);
-    m_dv_et_M = new TH1F("dv_et_M","DV mass in GeV", 1000, 0, 1000. );
-    m_dv_et_R = new TH1F("dv_et_R","R [mm]", 300, 0, 300. );
+    m_dv_et_cf = new TH1D( "m_dv_et_cf", "Reco dv et cutflow", 12,0,12);
+    m_dv_et_M = new TH1F("dv_et_M","DV mass in GeV", 2000,0,2000. );
+    m_dv_et_R = new TH1F("dv_et_R","R [mm]", 600,0,600 );
     m_dv_et_z = new TH1F("dv_et_z","z [mm]", 1000, -1000., 1000.);
     m_dv_et_deltaR = new TH1F("dv_et_deltaR","deltaR", 20, 0., 2.);
-    m_dv_et_l = new TH1F("dv_et_l","l [mm]", 20, 0., 1000.);
+    m_dv_et_l = new TH1F("dv_et_l","l [mm]", 100, 0., 1000.);
     m_dv_et_chi2_ndof = new TH1F("dv_et_chi2_ndof","chi^2 / ndof", 200,0.,50);
     m_dv_et_DeltaR = new TH1F("dv_et_DeltaR","Signal et Delta R",100, 0., 5.);
     m_dv_et_DeltaR_low = new TH1F("dv_et_DeltaR_low","Signal et Delta R low",100, 0., 1);
-    m_dv_et_Rcos = new TH1F("dv_et_Rcos","Signal et Rcos",50, 0., 5.);
+    m_dv_et_Rcos = new TH1F("dv_et_Rcos","Signal et Rcos",5000, 0, 5);
     m_dv_et_Rcos_low = new TH1F("dv_et_Rcos_low","Signal et Rcos low",100, 0., 0.1);
 
     CHECK( histSvc->regHist("/DV/main_analysis/dv_mut/dv_mut_cf", m_dv_mut_cf) );
@@ -344,9 +346,9 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     //--------------------------------------------------------
     // idid vertex plots
     //--------------------------------------------------------
-    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 8,0,8);
-    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 1000, 0, 1000. );
-    m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 600, 0, 600. );
+    m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 12,0,12);
+    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000,0,2000. );
+    m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 600,0,600 );
     m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 1000, -1000., 1000.);
     m_dv_idid_deltaR = new TH1F("dv_idid_deltaR","deltaR", 20, 0., 2.);
     m_dv_idid_l = new TH1F("dv_idid_l","l [mm]", 100, 0., 1000.);
@@ -584,6 +586,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         // perform filter matching
         m_dilepdvc->DoFilterMatching(*dv);
 
+        // trigger matching
+        m_dilepdvc->DoTriggerMatching(*dv);
+
         // select only vertex with tracks
         if(dv->trackParticleLinks().size() != 2) continue;
 
@@ -601,7 +606,9 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         std::string channel = m_dvutils->DecayChannel(*dv);
 
         // blind signal region
-        if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) continue;
+        if(!isMC){
+            if ((channel == "mumu") or (channel == "ee") or (channel == "emu")) continue;
+        }
 
         // fill 2 tkr vertex
         m_dv_mumu_cf->Fill("vertex", 1);
@@ -644,13 +651,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_mass < mass_min) continue;
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_mumu_cf->Fill("R_{cos} > 0.01", 1);
+
             //// track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
             //m_dv_mumu_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
-
-            // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_mumu_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -659,6 +666,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_mumu_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_mumu_cf->Fill("FilterMatching", 1);
 
             // end of cut flow. Now plotting
             ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
@@ -718,13 +729,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_mass < mass_min) continue;
             m_dv_ee_cf->Fill("LowMassVeto", 1);
 
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_ee_cf->Fill("R_{cos} > 0.01", 1);
+
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
             //m_dv_ee_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
-
-            // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_ee_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -733,6 +744,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_ee_cf->Fill("FilterMatching", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -788,13 +803,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_mass < mass_min) continue;
             m_dv_emu_cf->Fill("LowMassVeto", 1);
 
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_emu_cf->Fill("R_{cos} > 0.01", 1);
+
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
             //m_dv_emu_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
-
-            // RPVLL filter matching
-            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
-            m_dv_emu_cf->Fill("FilterMatching", 1);
 
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -803,6 +818,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // RPVLL filter matching
+            if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
+            m_dv_emu_cf->Fill("FilterMatching", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -827,7 +846,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "mut") {
 
             // mut pair
-            m_dv_mut_cf->Fill("mux", 1);
+            m_dv_mut_cf->Fill("#mux", 1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -853,6 +872,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_mass < mass_min) continue;
             m_dv_mut_cf->Fill("LowMassVeto", 1);
 
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_mut_cf->Fill("R_{cos} > 0.01", 1);
+
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
             m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
@@ -860,6 +883,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // RPVLL filter matching
+            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            m_dv_mut_cf->Fill("FilterMatching", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -888,7 +915,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         if (channel == "et") {
 
             // et pair
-            m_dv_et_cf->Fill("mux", 1);
+            m_dv_et_cf->Fill("ex", 1);
 
             // vertex fit quality
             if(!m_dvc->PassChisqCut(*dv)) continue;
@@ -913,6 +940,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // low mass veto
             if(dv_mass < mass_min) continue;
             m_dv_et_cf->Fill("LowMassVeto", 1);
+
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_et_cf->Fill("R_{cos} > 0.01", 1);
             
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
@@ -921,6 +952,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // DV z <  300 mm
             if(dv_z > dv_z_max) continue;
             m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
+
+            // RPVLL filter matching
+            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            m_dv_et_cf->Fill("FilterMatching", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -975,6 +1010,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_mass < mass_min) continue;
             m_dv_idid_cf->Fill("LowMassVeto", 1);
 
+            // cosmic veto
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_idid_cf->Fill("R_{cos} > 0.01", 1);
+
             // DV R <  300 mm
             if(dv_R > dv_R_max) continue;
             m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
@@ -983,12 +1022,14 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
 
-            // track z0 wrt beam pipe
-            if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            m_dv_idid_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
+            // RPVLL filter matching
+            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            m_dv_idid_cf->Fill("FilterMatching", 1);
 
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_idid_cf->Fill("R_{cos} > 0.01", 1);
+            // track z0 wrt beam pipe
+            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
+            //m_dv_idid_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
+
 
 
             //==========================================
@@ -1107,6 +1148,11 @@ void DisplacedDimuonAnalysisAlg::plot_cosmic(const DataVector<xAOD::Muon> dv_muc
 
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
     float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
+
+    ATH_MSG_INFO("DEBUG: deltaPhiMinusPi = " << deltaPhiMinusPi);
+    ATH_MSG_INFO("DEBUG: sumEta = " << sumEta);
+    ATH_MSG_INFO("DEBUG: Rcos = " << Rcos);
+
 
     if (channel == "mumu"){
         m_dv_mumu_Rcos->Fill(Rcos);

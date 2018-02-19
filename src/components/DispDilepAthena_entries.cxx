@@ -13,13 +13,16 @@ DECLARE_ALGORITHM_FACTORY( DisplacedDimuonAnalysisAlg )
 #include "../DispDilepAthena/DVUtils.h"
 #include "../DispDilepAthena/LeptonSelectionTools.h"
 #include "../DispDilepAthena/CosmicTools.h"
+#include "../DispDilepAthena/FilterMatchingTools.h"
 DECLARE_TOOL_FACTORY( DVUtils )
 DECLARE_TOOL_FACTORY( LeptonSelectionTools )
 DECLARE_TOOL_FACTORY( CosmicTools )
+DECLARE_TOOL_FACTORY( FilterMatchingTools )
 
 
 #include "../VertexingSystematics.h"
 DECLARE_ALGORITHM_FACTORY( VertexingSystematics )
+
 
 DECLARE_FACTORY_ENTRIES( DispDilepAthena ) 
 {
@@ -30,4 +33,5 @@ DECLARE_FACTORY_ENTRIES( DispDilepAthena )
   DECLARE_TOOL( DVUtils )
   DECLARE_TOOL( LeptonSelectionTools )
   DECLARE_TOOL( CosmicTools )
+  DECLARE_TOOL( FilterMatchingTools );
 }

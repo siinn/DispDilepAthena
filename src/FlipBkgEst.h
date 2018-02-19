@@ -27,11 +27,14 @@
 #include "DDLBase/IOverlapRemoval.h"
 #include "DDLBase/ITrigMatch.h"
 #include "DDLCombBkg/IVertexing.h"
+#include "DDLCombBkg/IDESDFilters.h"
+#include "DDLBase/IPhotonMatch.h"
 
 // DVUtil
 #include "DispDilepAthena/DVUtils.h"
 #include "DispDilepAthena/LeptonSelectionTools.h"
 #include "DispDilepAthena/CosmicTools.h"
+#include "DispDilepAthena/FilterMatchingTools.h"
 
 // GRL
 #include "GoodRunsLists/IGoodRunsListSelectionTool.h"
@@ -92,12 +95,16 @@ class FlipBkgEst: public ::AthAnalysisAlgorithm {
         ToolHandle<DDL::IDiLepCosmics> m_cos; //!
         ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool; //!
         ToolHandle<Trk::ITrkVKalVrtFitter> m_fitsvc;
+        ToolHandle<DDL::IDESDFilters> m_filters;
+        ToolHandle<DDL::IPhotonMatch> m_phmatch;
+        ToolHandle<IFilterMatchingTools> m_fmtool; //!
 
         // DV mass accessor
         SG::AuxElement::ConstAccessor<float> m_accMass;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::ElectronContainer>> m_accEl;
         SG::AuxElement::Accessor<std::shared_ptr<xAOD::MuonContainer>> m_accMu;
         SG::AuxElement::Accessor<TLorentzVector> m_acc_p4;
+        SG::AuxElement::Accessor<int> m_acc_type;
 
         // histograms
         TH1D* m_n_mu; //!
