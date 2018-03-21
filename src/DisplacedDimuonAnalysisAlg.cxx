@@ -74,6 +74,32 @@ DisplacedDimuonAnalysisAlg::~DisplacedDimuonAnalysisAlg() {}
 StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
+    // initialize tools
+    ATH_CHECK(m_dvutils.retrieve());
+    ATH_CHECK(m_leptool.retrieve());
+    ATH_CHECK(m_costool.retrieve());
+    ATH_CHECK(m_grlTool.retrieve());
+    ATH_CHECK(m_tdt.retrieve());
+    ATH_CHECK(m_tmt.retrieve());
+    ATH_CHECK(m_or.retrieve());
+    ATH_CHECK(m_cos.retrieve());
+    ATH_CHECK(m_evtc.retrieve());
+    ATH_CHECK(m_dvc.retrieve());
+    ATH_CHECK(m_dilepdvc.retrieve());
+    ATH_CHECK(m_phmatch.retrieve());
+    ATH_CHECK(m_trackToVertexTool.retrieve());
+    ATH_CHECK(m_fmtool.retrieve());
+
+
+
+
+
+
+
+
+
+
+
     ServiceHandle<ITHistSvc> histSvc("THistSvc",name());
 
     // event cut flow
@@ -531,7 +557,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         auto pv_pos = pv->position();
 
         // z_pv cut
-        if(pv_pos.z() > pv_z_max) return StatusCode::SUCCESS;
+        if(std::abs(pv_pos.z()) > pv_z_max) return StatusCode::SUCCESS;
     }
     else return StatusCode::SUCCESS;
     m_event_cutflow->Fill("z_{PV} < 200 mm", 1);
@@ -652,8 +678,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_mumu_cf->Fill("R_{cos} > 0.01", 1);
+            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            //m_dv_mumu_cf->Fill("R_{cos} > 0.01", 1);
 
             //// track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -671,6 +697,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_mumu_cf->Fill("FilterMatching", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_mumu_cf->Fill("Track kinematic", 1);
+
+
             // end of cut flow. Now plotting
             ATH_MSG_INFO("Found signal mumu with mass = " << dv_mass << ", runNumber = "
             << evtInfo->runNumber() << ", eventNumber = "
@@ -683,7 +714,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
             // plot cosmic variable
-            plot_cosmic(*dv_muc, *dv_elc, channel);
+            plot_cosmic(tp1, tp2, channel);
 
             // truth match
             if (isMC){
@@ -730,8 +761,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_ee_cf->Fill("R_{cos} > 0.01", 1);
+            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            //m_dv_ee_cf->Fill("R_{cos} > 0.01", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -749,6 +780,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_ee_cf->Fill("FilterMatching", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_ee_cf->Fill("Track kinematic", 1);
+
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
 
@@ -756,7 +791,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
             // plot cosmic variable
-            plot_cosmic(*dv_muc, *dv_elc, channel);
+            plot_cosmic(tp1, tp2, channel);
 
             // truth match
             if (isMC){
@@ -804,8 +839,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            m_dv_emu_cf->Fill("R_{cos} > 0.01", 1);
+            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            //m_dv_emu_cf->Fill("R_{cos} > 0.01", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -823,6 +858,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_emu_cf->Fill("FilterMatching", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_emu_cf->Fill("Track kinematic", 1);
+
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
 
@@ -830,7 +869,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             plot_signal_tp(*dv_muc, *dv_elc, channel);
 
             // plot cosmic variable
-            plot_cosmic(*dv_muc, *dv_elc, channel);
+            plot_cosmic(tp1, tp2, channel);
 
             // truth match
             if (isMC){
@@ -884,9 +923,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_mut_cf->Fill("Track kinematic", 1);
+
             // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_mut_cf->Fill("FilterMatching", 1);
+            //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            //m_dv_mut_cf->Fill("FilterMatching", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -898,7 +941,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mut_deltaR->Fill(deltaR);
 
             // plot cosmic variable
-            plot_cosmic(*dv_muc, *dv_elc, channel);
+            plot_cosmic(tp1, tp2, channel);
 
 
             // truth match
@@ -953,9 +996,13 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_et_cf->Fill("Track kinematic", 1);
+
             // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_et_cf->Fill("FilterMatching", 1);
+            //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            //m_dv_et_cf->Fill("FilterMatching", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -967,7 +1014,7 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_et_deltaR->Fill(deltaR);
 
             // plot cosmic variable
-            plot_cosmic(*dv_muc, *dv_elc, channel);
+            plot_cosmic(tp1, tp2, channel);
 
 
             // truth match
@@ -1022,9 +1069,14 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             if(dv_z > dv_z_max) continue;
             m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
 
+            // track kinematic cut
+            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            m_dv_idid_cf->Fill("Track kinematic", 1);
+
+
             // RPVLL filter matching
-            if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
-            m_dv_idid_cf->Fill("FilterMatching", 1);
+            //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
+            //m_dv_idid_cf->Fill("FilterMatching", 1);
 
             // track z0 wrt beam pipe
             //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
@@ -1140,19 +1192,20 @@ StatusCode DisplacedDimuonAnalysisAlg::beginInputFile() {
   return StatusCode::SUCCESS;
 }
 
-void DisplacedDimuonAnalysisAlg::plot_cosmic(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel) {
+void DisplacedDimuonAnalysisAlg::plot_cosmic(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, std::string channel) {
     ATH_MSG_DEBUG ("Plotting cosmic" << name() << "...");
 
-    float deltaPhiMinusPi = m_costool->getDeltaPhiMinusPi(dv_muc, dv_elc, channel);
-    float sumEta = m_costool->getSumEta(dv_muc, dv_elc, channel);
+    // define TLorentzVector of decay particles
+    TLorentzVector tlv_tp0;
+    TLorentzVector tlv_tp1;
+    tlv_tp0 = tr1.p4();
+    tlv_tp1 = tr2.p4();
+            
+    float deltaPhiMinusPi = std::fabs(std::fabs(tlv_tp0.DeltaPhi(tlv_tp1)) - std::acos(-1.));
+    float sumEta = tlv_tp0.Eta() + tlv_tp1.Eta();
 
+    float deltaR = tlv_tp0.DeltaR(tlv_tp1);
     float Rcos = std::sqrt(sumEta * sumEta + deltaPhiMinusPi * deltaPhiMinusPi);
-    float deltaR = m_costool->getDeltaR(dv_muc, dv_elc, channel);
-
-    ATH_MSG_INFO("DEBUG: deltaPhiMinusPi = " << deltaPhiMinusPi);
-    ATH_MSG_INFO("DEBUG: sumEta = " << sumEta);
-    ATH_MSG_INFO("DEBUG: Rcos = " << Rcos);
-
 
     if (channel == "mumu"){
         m_dv_mumu_Rcos->Fill(Rcos);

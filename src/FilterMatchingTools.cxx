@@ -88,3 +88,36 @@ bool FilterMatchingTools::PassSingleMuon(xAOD::TrackParticle& tp1, xAOD::TrackPa
     return pass;
 }
 
+
+
+bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) {
+
+    bool pass = true;
+
+    // set selection
+    float pt_min = 10.;    // GeV
+    float eta_max = 2.5;
+    
+    // both tracks need to pass pt and eta cut
+    if ((tp1.pt() / 1000 < pt_min) || (std::abs(tp1.eta()) > eta_max)) pass = false;
+    if ((tp2.pt() / 1000 < pt_min) || (std::abs(tp2.eta()) > eta_max)) pass = false;
+
+    return pass;
+}
+
+
+
+bool FilterMatchingTools::PassTrackKinematic(xAOD::TrackParticle& tp1) {
+
+    bool pass = false;
+
+    // set selection
+    float pt_min = 10.;    // GeV
+    float eta_max = 2.5;
+    
+    // both tracks need to pass pt and eta cut
+    if ((tp1.pt() / 1000 > pt_min) && (std::abs(tp1.eta()) < eta_max)) pass = true;
+
+    return pass;
+}
+

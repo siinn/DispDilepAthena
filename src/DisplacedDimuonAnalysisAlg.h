@@ -47,7 +47,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
         
         virtual StatusCode beginInputFile();
 
-        virtual void plot_cosmic(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
+        virtual void plot_cosmic(xAOD::TrackParticle& tr1, xAOD::TrackParticle& tr2, std::string channel);
         virtual void plot_signal_tp(const DataVector<xAOD::Muon> dv_muc, const DataVector<xAOD::Electron> dv_elc, std::string channel);
         virtual void plot_dv(const xAOD::Vertex& dv, const xAOD::Vertex& pv, std::string channel);
 
@@ -59,7 +59,7 @@ class DisplacedDimuonAnalysisAlg: public ::AthAnalysisAlgorithm {
 
         // setting tools
         ToolHandle<IGoodRunsListSelectionTool> m_grlTool; //!
-        ToolHandle<Trig::TrigDecisionTool> m_tdt; //!
+        ToolHandle<Trig::ITrigDecisionTool> m_tdt; //!
         ToolHandle<IDVUtils> m_dvutils; //!
         ToolHandle<ILeptonSelectionTools> m_leptool; //!
         ToolHandle<ICosmicTools> m_costool; //!

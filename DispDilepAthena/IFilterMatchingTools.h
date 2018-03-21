@@ -24,6 +24,13 @@ class IFilterMatchingTools: virtual public IAlgTool {
         virtual bool PassSingleEgamma(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) = 0;
         virtual bool PassDiEgamma(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) = 0;
         virtual bool PassSingleMuon(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) = 0;
+
+
+        // pt cut for two tracks
+        virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1, xAOD::TrackParticle& tp2) = 0;
+
+        // pt cut for track
+        virtual bool PassTrackKinematic(xAOD::TrackParticle& tp1) = 0;
     
     private:
     
