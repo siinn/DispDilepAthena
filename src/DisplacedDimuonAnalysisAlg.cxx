@@ -373,13 +373,13 @@ StatusCode DisplacedDimuonAnalysisAlg::initialize() {
     // idid vertex plots
     //--------------------------------------------------------
     m_dv_idid_cf = new TH1D( "m_dv_idid_cf", "Reco dv idid cutflow", 12,0,12);
-    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 2000,0,2000. );
-    m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 600,0,600 );
-    m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 1000, -1000., 1000.);
+    m_dv_idid_M = new TH1F("dv_idid_M","DV mass in GeV", 10,10,60. );
+    m_dv_idid_R = new TH1F("dv_idid_R","R [mm]", 30,0,300 );
+    m_dv_idid_z = new TH1F("dv_idid_z","z [mm]", 30, -300., 300.);
     m_dv_idid_deltaR = new TH1F("dv_idid_deltaR","deltaR", 20, 0., 2.);
     m_dv_idid_l = new TH1F("dv_idid_l","l [mm]", 100, 0., 1000.);
     m_dv_idid_n_tracks = new TH1F( "dv_idid_n_tracks", "vertex vs track multiplicity", 500,0,500);
-    m_dv_idid_chi2_ndof = new TH1F("dv_idid_chi2_ndof","chi^2 / ndof", 200,0.,50);
+    m_dv_idid_chi2_ndof = new TH1F("dv_idid_chi2_ndof","chi^2 / ndof", 10,0.,5);
 
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_cf", m_dv_idid_cf) );
     CHECK( histSvc->regHist("/DV/main_analysis/dv_idid/dv_idid_M", m_dv_idid_M) );
@@ -534,7 +534,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
     if (m_tdt->isPassed("HLT_mu60_0eta105_msonly")) trig_passed = true;
     if (m_tdt->isPassed("HLT_g140_loose")) trig_passed = true;
     if (m_tdt->isPassed("HLT_2g50_loose")) trig_passed = true;
-    //if (m_tdt->isPassed("HLT_2g60_loose_L12EM15VH")) trig_passed = true;
 
     // trigger check
     if(!trig_passed) return StatusCode::SUCCESS;
@@ -628,6 +627,10 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
         float dv_R = m_dvutils->getR( *dv, *pv );                 // R in [mm]
         float dv_z = std::abs(m_dvutils->getz( *dv, *pv ));       // z in [mm]
 
+        // posotion w.r.t beam spot
+        float dv_R_wrt_beam = std::abs((*dv).position().perp());    // R in [mm]
+        float dv_z_wrt_beam = std::abs((*dv).position().z());       // z in [mm]
+
         // find decay channel of dv
         std::string channel = m_dvutils->DecayChannel(*dv);
 
@@ -678,19 +681,15 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_mumu_cf->Fill("R_{cos} > 0.01", 1);
-
-            //// track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_mumu_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_mumu_cf->Fill("R_{cos} > 0.01", 1);
 
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_mumu_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_mumu_cf->Fill("z_{DV} > 300 mm", 1);
 
             // RPVLL filter matching
@@ -698,8 +697,8 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mumu_cf->Fill("FilterMatching", 1);
 
             // track kinematic cut
-            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
-            m_dv_mumu_cf->Fill("Track kinematic", 1);
+            //if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
+            //m_dv_mumu_cf->Fill("Track kinematic", 1);
 
 
             // end of cut flow. Now plotting
@@ -761,28 +760,20 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_ee_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_ee_cf->Fill("R_{cos} > 0.01", 1);
-
-            // track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_ee_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_ee_cf->Fill("R_{cos} > 0.01", 1);
 
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_ee_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_ee_cf->Fill("z_{DV} > 300 mm", 1);
 
             // RPVLL filter matching
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_ee_cf->Fill("FilterMatching", 1);
-
-            // track kinematic cut
-            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
-            m_dv_ee_cf->Fill("Track kinematic", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -839,28 +830,20 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_emu_cf->Fill("LowMassVeto", 1);
 
             // cosmic veto
-            //if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
-            //m_dv_emu_cf->Fill("R_{cos} > 0.01", 1);
-
-            // track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_emu_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
+            if(!PassCosmicVeto_R_CR(tp1, tp2)) continue;
+            m_dv_emu_cf->Fill("R_{cos} > 0.01", 1);
 
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_emu_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_emu_cf->Fill("z_{DV} > 300 mm", 1);
 
             // RPVLL filter matching
             if(!m_dilepdvc->PassFilterMatching(*dv)) continue;
             m_dv_emu_cf->Fill("FilterMatching", 1);
-
-            // track kinematic cut
-            if(!m_fmtool->PassTrackKinematic(tp1, tp2)) continue;
-            m_dv_emu_cf->Fill("Track kinematic", 1);
 
             // plot dv distributions
             plot_dv(*dv, *pv, channel);
@@ -916,11 +899,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_mut_cf->Fill("R_{cos} > 0.01", 1);
 
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_mut_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_mut_cf->Fill("z_{DV} > 300 mm", 1);
 
             // track kinematic cut
@@ -930,10 +913,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // RPVLL filter matching
             //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
             //m_dv_mut_cf->Fill("FilterMatching", 1);
-
-            // track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_mut_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
 
             // plot dv
             plot_dv(*dv, *pv, channel);
@@ -989,11 +968,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_et_cf->Fill("R_{cos} > 0.01", 1);
             
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_et_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_et_cf->Fill("z_{DV} > 300 mm", 1);
 
             // track kinematic cut
@@ -1004,9 +983,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
             //m_dv_et_cf->Fill("FilterMatching", 1);
 
-            // track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_et_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
 
             // plot dv
             plot_dv(*dv, *pv, channel);
@@ -1062,11 +1038,11 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             m_dv_idid_cf->Fill("R_{cos} > 0.01", 1);
 
             // DV R <  300 mm
-            if(dv_R > dv_R_max) continue;
+            if(dv_R_wrt_beam > dv_R_max) continue;
             m_dv_idid_cf->Fill("R_{DV} > 300 mm", 1);
 
             // DV z <  300 mm
-            if(dv_z > dv_z_max) continue;
+            if(dv_z_wrt_beam > dv_z_max) continue;
             m_dv_idid_cf->Fill("z_{DV} > 300 mm", 1);
 
             // track kinematic cut
@@ -1077,11 +1053,6 @@ StatusCode DisplacedDimuonAnalysisAlg::execute() {
             // RPVLL filter matching
             //if(!m_fmtool->PassFilter(channel, tp1, tp2)) continue;
             //m_dv_idid_cf->Fill("FilterMatching", 1);
-
-            // track z0 wrt beam pipe
-            //if(std::abs((tp1.z0()) < 10) or (std::abs(tp2.z0()) < 10)) continue;
-            //m_dv_idid_cf->Fill("Track z_{0} > 10 mm (BP)", 1);
-
 
 
             //==========================================
